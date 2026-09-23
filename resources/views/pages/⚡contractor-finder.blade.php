@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\AiContractorChatParser;
+use App\Services\AiContractorConversation;
 use App\Services\ContractorCatalog;
 use App\Services\ContractorChatGuide;
 use App\Services\ContractorMatcher;
@@ -35,6 +36,11 @@ new #[Layout('layouts.finder')] class extends Component {
     public string $chatInput = '';
     public string $chatStep = 'city';
     public bool $chatBusy = false;
+    public bool $chatNlp = false;
+
+    /** Raw value queued for the async chat turn (chips / free text). */
+    #[Locked]
+    public string $pendingChatRaw = '';
 
     /** @var list<array{role: string, text: string}> */
     public array $chatMessages = [];
@@ -42,16 +48,15 @@ new #[Layout('layouts.finder')] class extends Component {
     /** @var array<string, mixed> */
     public array $chatDraft = [];
 
-    public function mount(ContractorChatGuide $guide): void
+    public function mount(): void
     {
         $this->locale = app()->getLocale();
         $this->chatMessages = [
-            ['role' => 'assistant', 'text' => __('Здравствуйте. Я помогу подобрать до трёх подрядчиков из каталога. Отвечайте кнопками или текстом.')],
-            ['role' => 'assistant', 'text' => $guide->question('city')],
+            ['role' => 'assistant', 'text' => __('Привет! Я помогу подобрать подрядчиков из каталога. Расскажите про событие своими словами — город, формат, кого ищете, дату и бюджет.')],
         ];
     }
 
-    public function switchLocale(string $locale, ContractorMatcher $matcher, ContractorChatGuide $guide): void
+    public function switchLocale(string $locale, ContractorMatcher $matcher): void
     {
         abort_unless(in_array($locale, ['kk', 'ru'], true), 400);
         session()->put('locale', $locale);
@@ -66,16 +71,9 @@ new #[Layout('layouts.finder')] class extends Component {
             unset($card);
         }
 
-        if ($this->chatStep !== 'done' && $this->chatMessages !== []) {
-            $this->chatMessages[count($this->chatMessages) - 1] = [
-                'role' => 'assistant',
-                'text' => $guide->question($this->chatStep),
-            ];
-        }
-
         $this->dispatch('locale-changed',
             locale: $locale,
-            title: __('Повод — подрядчики для вашего события').' - '.config('app.name'),
+            title: __('Повод — подрядчики для вашего события'),
             description: __('Подберите до трёх подрядчиков для мероприятия по городу, дате, бюджету и формату. С понятными причинами выбора.'),
         );
     }
@@ -115,14 +113,16 @@ new #[Layout('layouts.finder')] class extends Component {
         $this->chatOpen = false;
     }
 
-    public function restartChat(ContractorChatGuide $guide): void
+    public function restartChat(): void
     {
         $this->chatStep = 'city';
         $this->chatDraft = [];
         $this->chatInput = '';
         $this->chatBusy = false;
+        $this->chatNlp = false;
+        $this->pendingChatRaw = '';
         $this->chatMessages = [
-            ['role' => 'assistant', 'text' => __('Начнём заново. В каком городе пройдёт событие?')],
+            ['role' => 'assistant', 'text' => __('Давайте сначала. Где и какое событие планируете?')],
         ];
         $this->chatOpen = true;
     }
@@ -135,27 +135,83 @@ new #[Layout('layouts.finder')] class extends Component {
         $this->city = $item['city'];
         $this->category = $item['category'];
         $this->event_format = $item['event_format'];
+        $this->chatDraft = [
+            'city' => $item['city'],
+            'category' => $item['category'],
+            'event_format' => $item['event_format'],
+        ];
+        $this->chatStep = 'date';
         $this->openChat();
         $this->chatMessages[] = [
             'role' => 'assistant',
-            'text' => __('Открыл подбор по витрине «:title». Можно продолжить в чате или заполнить форму ниже.', ['title' => __($item['title'])]),
+            'text' => __('Открыл подбор по витрине «:title». Осталось уточнить дату и бюджет — напишите, как удобно.', ['title' => __($item['title'])]),
         ];
     }
 
-    public function selectChatChip(string $value, ContractorChatGuide $guide, AiContractorChatParser $parser, ContractorMatcher $matcher): void
+    public function selectChatChip(string $value, ContractorChatGuide $guide): void
     {
-        $this->acceptChatAnswer($value, $guide, $parser, $matcher, fromChip: true);
+        if ($this->chatStep === 'done' || $this->chatBusy) {
+            return;
+        }
+
+        $label = collect($guide->chips($this->chatStep))->firstWhere('value', $value)['label'] ?? $value;
+        $this->queueChatTurn($label === '' ? __('Пропущено') : (string) $label, $value);
     }
 
-    public function sendChatMessage(ContractorChatGuide $guide, AiContractorChatParser $parser, ContractorMatcher $matcher): void
+    public function sendChatMessage(): void
     {
-        $this->acceptChatAnswer($this->chatInput, $guide, $parser, $matcher, fromChip: false);
+        $text = trim($this->chatInput);
+        if ($text === '' || $this->chatBusy || $this->chatStep === 'done') {
+            return;
+        }
+
+        $this->queueChatTurn($text, $text);
     }
 
-    public function skipChatStep(ContractorChatGuide $guide, AiContractorChatParser $parser, ContractorMatcher $matcher): void
+    public function skipChatStep(ContractorChatGuide $guide): void
     {
         abort_unless($guide->isOptional($this->chatStep), 400);
-        $this->acceptChatAnswer('', $guide, $parser, $matcher, fromChip: true);
+
+        if ($this->chatBusy || $this->chatStep === 'done') {
+            return;
+        }
+
+        $this->queueChatTurn(__('Пропущено'), '');
+    }
+
+    public function completeChatTurn(
+        ContractorChatGuide $guide,
+        AiContractorChatParser $parser,
+        AiContractorConversation $conversation,
+        ContractorMatcher $matcher,
+    ): void {
+        if (! $this->chatBusy || $this->chatStep === 'done') {
+            return;
+        }
+
+        $rawValue = $this->pendingChatRaw;
+        $this->pendingChatRaw = '';
+
+        try {
+            $nlp = $conversation->converse($this->chatMessages, $this->chatDraft);
+
+            if ($nlp !== null) {
+                $this->chatNlp = true;
+                $this->chatDraft = $nlp['draft'];
+                $this->chatMessages[] = ['role' => 'assistant', 'text' => $nlp['message']];
+                $this->chatStep = $guide->nextMissing($this->chatDraft);
+
+                if ($nlp['ready']) {
+                    $this->finishChatMatch($guide, $matcher);
+                }
+
+                return;
+            }
+
+            $this->acceptGuidedAnswer($rawValue, $guide, $parser, $matcher);
+        } finally {
+            $this->chatBusy = false;
+        }
     }
 
     public function search(ContractorMatcher $matcher): void
@@ -193,20 +249,34 @@ new #[Layout('layouts.finder')] class extends Component {
         $this->result = $matcher->match($this->submitted);
     }
 
-    private function acceptChatAnswer(string $raw, ContractorChatGuide $guide, AiContractorChatParser $parser, ContractorMatcher $matcher, bool $fromChip): void
+    private function queueChatTurn(string $display, string $rawValue): void
     {
-        if ($this->chatStep === 'done' || $this->chatBusy) {
-            return;
-        }
-
         $this->chatBusy = true;
-        $display = trim($raw) === '' ? __('Пропущено') : trim($raw);
+        $this->pendingChatRaw = $rawValue;
         $this->chatMessages[] = ['role' => 'user', 'text' => $display];
         $this->chatInput = '';
 
+        if (app()->runningUnitTests()) {
+            $this->completeChatTurn(
+                app(ContractorChatGuide::class),
+                app(AiContractorChatParser::class),
+                app(AiContractorConversation::class),
+                app(ContractorMatcher::class),
+            );
+
+            return;
+        }
+
+        // First request morphs the user bubble + "Думаю…"; then run NLP/guided reply.
+        // Capture $wire now — Alpine magics are not available inside queueMicrotask/setTimeout.
+        $this->js('const wire = $wire; setTimeout(() => wire.completeChatTurn(), 0)');
+    }
+
+    private function acceptGuidedAnswer(string $raw, ContractorChatGuide $guide, AiContractorChatParser $parser, ContractorMatcher $matcher): void
+    {
         $parsed = $guide->normalize($this->chatStep, $raw);
 
-        if (! $parsed['ok'] && ! $fromChip) {
+        if (! $parsed['ok']) {
             $aiValue = $parser->parse($this->chatStep, $raw, $guide->chips($this->chatStep));
             if ($aiValue !== null) {
                 $parsed = $guide->normalize($this->chatStep, $aiValue);
@@ -215,7 +285,6 @@ new #[Layout('layouts.finder')] class extends Component {
 
         if (! $parsed['ok']) {
             $this->chatMessages[] = ['role' => 'assistant', 'text' => $parsed['error'] ?? __('Не понял ответ. Выберите вариант ниже.')];
-            $this->chatBusy = false;
 
             return;
         }
@@ -230,38 +299,49 @@ new #[Layout('layouts.finder')] class extends Component {
         $this->chatStep = $next;
 
         if ($next === 'done') {
-            $criteria = $guide->toCriteria($this->chatDraft);
-            $this->city = $criteria['city'];
-            $this->date = $criteria['date'];
-            $this->category = $criteria['category'];
-            $this->event_format = $criteria['event_format'];
-            $this->budget = (string) $criteria['budget'];
-            $this->hours = $criteria['hours'] === null ? '' : (string) $criteria['hours'];
-            $this->language = $criteria['language'] ?? '';
-            $this->submitted = $criteria;
-            $this->result = $matcher->match($criteria);
-            $count = count($this->result['contractors']);
-            $this->chatMessages[] = [
-                'role' => 'assistant',
-                'text' => $count > 0
-                    ? __('Готово. Ниже — до трёх вариантов с причинами. Карточки также в разделе результатов.')
-                    : __('По этим условиям карточек нет. Смотрите пояснение в результатах — можно изменить ответ и начать заново.'),
-            ];
-            $this->chatBusy = false;
-            $this->dispatch('chat-finished');
+            $this->finishChatMatch($guide, $matcher);
 
             return;
         }
 
         $this->chatMessages[] = ['role' => 'assistant', 'text' => $guide->question($next)];
-        $this->chatBusy = false;
+    }
+
+    private function finishChatMatch(ContractorChatGuide $guide, ContractorMatcher $matcher): void
+    {
+        if (! $guide->isReady($this->chatDraft)) {
+            $this->chatStep = $guide->nextMissing($this->chatDraft);
+            $this->chatMessages[] = ['role' => 'assistant', 'text' => $guide->question($this->chatStep)];
+
+            return;
+        }
+
+        $criteria = $guide->toCriteria($this->chatDraft);
+        $this->city = $criteria['city'];
+        $this->date = $criteria['date'];
+        $this->category = $criteria['category'];
+        $this->event_format = $criteria['event_format'];
+        $this->budget = (string) $criteria['budget'];
+        $this->hours = $criteria['hours'] === null ? '' : (string) $criteria['hours'];
+        $this->language = $criteria['language'] ?? '';
+        $this->submitted = $criteria;
+        $this->result = $matcher->match($criteria);
+        $this->chatStep = 'done';
+        $count = count($this->result['contractors']);
+        $this->chatMessages[] = [
+            'role' => 'assistant',
+            'text' => $count > 0
+                ? __('Готово. Ниже — до трёх вариантов с причинами. Карточки также в разделе результатов.')
+                : __('По этим условиям карточек нет. Смотрите пояснение в результатах — можно изменить ответ и начать заново.'),
+        ];
+        $this->dispatch('chat-finished');
     }
 }; ?>
 
 <div class="finder" x-data x-on:locale-changed.window="document.documentElement.lang = $event.detail.locale; document.title = $event.detail.title; document.querySelector('meta[name=description]').content = $event.detail.description">
     <a class="skip-link" href="#finder-form">{{ __('Перейти к подбору') }}</a>
     <header class="site-header shell">
-        <a class="wordmark" href="{{ route('home') }}" aria-label="{{ __('Повод — главная') }}">повод<span>✳</span></a>
+        <a class="wordmark" href="{{ route('home') }}" aria-label="{{ __('Повод — главная') }}"><img src="{{ asset('images/firebird-glyph.svg') }}" width="24" height="31" alt="">nxt</a>
         <div class="header-tools">
             <nav class="language-switch" aria-label="{{ __('Язык интерфейса') }}">
                 <button type="button" wire:click="switchLocale('kk')" aria-pressed="{{ $locale === 'kk' ? 'true' : 'false' }}" lang="kk">Қазақша</button>
@@ -277,8 +357,7 @@ new #[Layout('layouts.finder')] class extends Component {
 
     <main class="shell">
         <section class="hero" aria-labelledby="finder-title">
-            <div class="eyebrow"><span class="dot"></span> {{ __('Люди, которые создают события') }}</div>
-            <h1 id="finder-title">{{ __('Ваш повод.') }}<br><em>{{ __('Ваши люди.') }}</em></h1>
+            <h1 id="finder-title">{{ __('Ваш повод.') }}<br><span class="hero-accent">{{ __('Ваши люди.') }}</span></h1>
             <div class="hero-bottom">
                 <p>{{ __('Найдём подрядчиков, которые подходят вашему событию. По дате, бюджету и делу.') }}<br> {{ __('Для свадьбы, большого корпоратива или праздника в кругу самых близких.') }}</p>
                 <div class="hero-actions">
@@ -288,10 +367,17 @@ new #[Layout('layouts.finder')] class extends Component {
             </div>
         </section>
 
+        <section class="finder-specs" aria-label="{{ __('С причинами выбора') }}">
+            <div class="finder-spec"><span class="spec-value">AI</span><span>{{ __('С причинами выбора') }}</span></div>
+            <div class="finder-spec"><span class="spec-value">03</span><span>{{ __('До 3 рекомендаций') }}</span></div>
+            <div class="finder-spec"><span class="spec-value spec-languages">KZ <span>/</span> RU</span><span>{{ __('Язык интерфейса') }}</span></div>
+            <div class="finder-spec"><span class="spec-value">₸</span><span>{{ __('Бюджет, ₸') }}</span></div>
+        </section>
+
         <section class="showcase" id="showcase" aria-labelledby="showcase-title" x-data="{ filter: 'all' }">
             <div class="showcase-heading">
                 <div>
-                    <span class="eyebrow">00 / {{ __('Витрина') }}</span>
+                    <span class="eyebrow">{{ __('Витрина') }}</span>
                     <h2 id="showcase-title">{{ __('Атмосфера событий.') }}</h2>
                     <p>{{ __('Живые кадры форматов из каталога. Нажмите карточку — откроем ИИ-чат с этими параметрами.') }}</p>
                 </div>
@@ -325,7 +411,7 @@ new #[Layout('layouts.finder')] class extends Component {
 
         <section class="brief-section" id="finder-form" aria-labelledby="brief-title">
             <aside class="section-intro">
-                <span class="eyebrow">01 / {{ __('Ваши условия') }}</span>
+                <span class="eyebrow">{{ __('Ваши условия') }}</span>
                 <h2 id="brief-title">{{ __('Что планируете?') }}</h2>
                 <p>{{ __('Расскажите о событии — мы сузим круг поиска.') }}</p>
                 <div class="calendar-note"><span aria-hidden="true">↗</span><div>{{ __('С причинами выбора') }}<strong>{{ __('Календарь каталога: 23 сентября — 31 декабря 2026 года.') }}</strong></div></div>
@@ -402,7 +488,7 @@ new #[Layout('layouts.finder')] class extends Component {
         </section>
 
         <section class="results-section" id="results-anchor" aria-live="polite" aria-atomic="true" aria-label="{{ __('Результаты подбора') }}">
-            <span class="eyebrow">02 / {{ __('Ваша подборка') }}</span>
+            <span class="eyebrow">{{ __('Ваша подборка') }}</span>
             <p wire:loading wire:target="search" role="status">{{ __('Проверяем доступность и подбираем варианты…') }}</p>
             <div wire:loading.remove wire:target="search">
                 @if ($result)
@@ -497,10 +583,11 @@ new #[Layout('layouts.finder')] class extends Component {
         </section>
     </main>
     <footer class="site-footer shell">
-        <a class="wordmark" href="{{ route('home') }}" aria-label="{{ __('Повод — главная') }}">повод<span>✳</span></a>
+        <a class="wordmark" href="{{ route('home') }}" aria-label="{{ __('Повод — главная') }}"><img src="{{ asset('images/firebird-glyph.svg') }}" width="24" height="31" alt="">nxt</a>
         <p>{{ __('повод. / Каталог для вашего события') }}</p>
         <span class="edition">{{ __('Демо · Осень — зима 2026 · Без бронирования') }}</span>
     </footer>
+    <div class="brand-signoff shell" aria-hidden="true"><span>nxt</span><img src="{{ asset('images/firebird-glyph.svg') }}" width="218" height="284" alt="" loading="lazy"></div>
 
     <div
         id="assistant-panel"
@@ -517,7 +604,7 @@ new #[Layout('layouts.finder')] class extends Component {
             <header class="chat-header">
                 <div>
                     <p class="eyebrow" id="chat-title">{{ __('ИИ-помощник') }}</p>
-                    <p class="chat-subtitle">{{ __('Спросит условия и предложит до трёх карточек') }}</p>
+                    <p class="chat-subtitle">{{ __('Живой диалог на Alem qwen3-8. В конце — до трёх карточек.') }}</p>
                 </div>
                 <div class="chat-header-actions">
                     <button type="button" class="chat-icon-btn" wire:click="restartChat" aria-label="{{ __('Начать заново') }}">
@@ -541,16 +628,25 @@ new #[Layout('layouts.finder')] class extends Component {
             @if ($chatStep !== 'done')
                 <div class="chat-chips" role="group" aria-label="{{ __('Быстрые ответы') }}">
                     @foreach ($this->chatChips as $chip)
-                        <button type="button" wire:key="chip-{{ $chatStep }}-{{ $chip['value'] !== '' ? $chip['value'] : 'empty' }}" class="chip" wire:click="selectChatChip({{ \Illuminate\Support\Js::from($chip['value']) }})" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep">{{ $chip['label'] }}</button>
+                        <button type="button" wire:key="chip-{{ $chatStep }}-{{ $chip['value'] !== '' ? $chip['value'] : 'empty' }}" class="chip" wire:click="selectChatChip({{ \Illuminate\Support\Js::from($chip['value']) }})" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn">{{ $chip['label'] }}</button>
                     @endforeach
                     @if (in_array($chatStep, ['language', 'hours'], true))
-                        <button type="button" class="chip chip-skip" wire:click="skipChatStep" wire:loading.attr="disabled">{{ __('Пропустить') }}</button>
+                        <button type="button" class="chip chip-skip" wire:click="skipChatStep" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn">{{ __('Пропустить') }}</button>
                     @endif
                 </div>
                 <form wire:submit="sendChatMessage" class="chat-compose">
                     <label class="sr-only" for="chat-input">{{ __('Ваш ответ') }}</label>
-                    <input id="chat-input" type="text" wire:model="chatInput" autocomplete="off" placeholder="{{ __('Или напишите ответ…') }}" @disabled($chatBusy)>
-                    <button type="submit" class="chat-send" wire:loading.attr="disabled" aria-label="{{ __('Отправить') }}">
+                    <input
+                        id="chat-input"
+                        type="text"
+                        wire:model.live="chatInput"
+                        autocomplete="off"
+                        placeholder="{{ __('Напишите, как другу…') }}"
+                        @disabled($chatBusy)
+                        wire:loading.attr="disabled"
+                        wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn"
+                    >
+                    <button type="submit" class="chat-send" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn" aria-label="{{ __('Отправить') }}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11.5 19 4l-4.5 16L11 13z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
                     </button>
                 </form>

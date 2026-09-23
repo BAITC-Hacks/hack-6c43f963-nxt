@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\ContractorChatGuide;
+use Laravel\Ai\StructuredAnonymousAgent;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -13,7 +14,7 @@ it('walks the chat through chips and finishes with up to three matched cards', f
     Livewire::test('pages::contractor-finder')
         ->call('openChat')
         ->assertSet('chatOpen', true)
-        ->assertSee('В каком городе пройдёт событие?')
+        ->assertSee('Привет! Я помогу подобрать подрядчиков')
         ->call('selectChatChip', 'Алматы')
         ->call('selectChatChip', 'свадьба')
         ->call('selectChatChip', 'Ведущий')
@@ -52,4 +53,39 @@ it('normalizes free-text budget and optional language answers', function () {
     expect($guide->normalize('budget', '1 500 000 тенге'))->toMatchArray(['ok' => true, 'value' => 1500000]);
     expect($guide->normalize('language', 'Любой'))->toMatchArray(['ok' => true, 'value' => null]);
     expect($guide->normalize('hours', ''))->toMatchArray(['ok' => true, 'value' => null]);
+});
+
+it('uses NLP conversation to collect criteria and match contractors', function () {
+    config([
+        'contractors.ai_enabled' => true,
+        'contractors.ai_provider' => 'openai',
+        'contractors.ai_model' => 'qwen3-8',
+        'ai.providers.openai.key' => 'test-key',
+    ]);
+
+    StructuredAnonymousAgent::fake([
+        [
+            'reply' => 'Отлично, уже вижу картину. Подберу варианты из каталога.',
+            'city' => 'Алматы',
+            'event_format' => 'свадьба',
+            'category' => 'Ведущий',
+            'date' => '2026-09-23',
+            'budget' => '1500000',
+            'language' => '',
+            'hours' => '',
+            'ready_to_match' => true,
+        ],
+        fn () => throw new RuntimeException('Ranking skipped in chat test'),
+    ]);
+
+    Livewire::test('pages::contractor-finder')
+        ->call('openChat')
+        ->set('chatInput', 'Нужен ведущий на свадьбу в Алматы 23 сентября, бюджет полтора миллиона')
+        ->call('sendChatMessage')
+        ->assertSet('chatNlp', true)
+        ->assertSet('chatStep', 'done')
+        ->assertSet('result.status', 'matched')
+        ->assertCount('result.contractors', 3)
+        ->assertSee('Отлично, уже вижу картину')
+        ->assertSee('Мицури Канроджи');
 });

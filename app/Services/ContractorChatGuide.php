@@ -150,6 +150,27 @@ class ContractorChatGuide
 
     /**
      * @param  Draft  $draft
+     * @return Step
+     */
+    public function nextMissing(array $draft): string
+    {
+        foreach (['city', 'event_format', 'category', 'date', 'budget'] as $step) {
+            if (! array_key_exists($step, $draft) || $draft[$step] === null || $draft[$step] === '') {
+                return $step;
+            }
+        }
+
+        foreach (['language', 'hours'] as $step) {
+            if (! array_key_exists($step, $draft)) {
+                return $step;
+            }
+        }
+
+        return 'done';
+    }
+
+    /**
+     * @param  Draft  $draft
      * @return Criteria
      */
     public function toCriteria(array $draft): array
