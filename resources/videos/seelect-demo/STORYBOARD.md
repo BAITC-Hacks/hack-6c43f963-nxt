@@ -17,7 +17,7 @@ music: "minimal warm electronic pulse"
 - duration: 8s
 - poster: 4s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/01.html
 - voiceover: "Раньше подготовка события начиналась с десятков вкладок. Кто свободен? Сколько стоит? Подойдёт ли формат? Всё приходилось проверять вручную."
 - type: pain_point
@@ -36,7 +36,7 @@ Scene 1 (0–2s): тёмное поле, огромный заголовок «�
 - duration: 6s
 - poster: 3s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/02.html
 - voiceover: "Теперь — сии лект. Умный подбор подрядчиков для вашего события в Казахстане. От условий — к понятному выбору."
 - type: product_intro
@@ -55,7 +55,7 @@ Scene 1 (0–1.5s): оранжевая плоскость вытесняет х�
 - duration: 10s
 - poster: 5s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/03.html
 - voiceover: "Например, свадьба в Алматы. Выбираем ведущего, дату и бюджет. При необходимости добавляем язык и длительность. Все условия — в одной форме."
 - type: feature_showcase
@@ -74,7 +74,7 @@ Scene 1 (0–2s): реальная форма справа, вводная сл�
 - duration: 10s
 - poster: 5s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/04.html
 - voiceover: "Получаем до трёх подходящих вариантов. Фото, цена и главное — почему именно этот специалист. Объяснение опирается на бюджет, формат и данные профиля."
 - type: feature_showcase
@@ -93,7 +93,7 @@ Scene 1 (0–2s): реальная выдача на 23 сентября, три
 - duration: 8s
 - poster: 4s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/05.html
 - voiceover: "Меняем дату — меняется подбор. Занятые специалисты не попадут в рекомендации. Сначала проверяется календарь, и только потом подключается искусственный интеллект."
 - type: feature_showcase
@@ -112,7 +112,7 @@ Scene 1 (0–2s): две даты на левой стороне, 23.09 акти
 - duration: 7s
 - poster: 3.5s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/06.html
 - voiceover: "Нет подходящих вариантов? Сервис объяснит причину. Например, цена выше бюджета. А оценочные данные и синтетические профили отмечены отдельно."
 - type: feature_showcase
@@ -131,7 +131,7 @@ Scene 1 (0–2s): крупно «Честно, даже если вариант�
 - duration: 11s
 - poster: 5.5s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/07.html
 - voiceover: "Не хотите заполнять форму? Расскажите о событии своими словами в чате. Ассистент уточнит детали и запустит тот же подбор. Интерфейс — на русском и казахском."
 - type: feature_showcase
@@ -150,7 +150,7 @@ Scene 1 (0–2s): заголовок «Можно своими словами».
 - duration: 9s
 - poster: 4.5s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/08.html
 - voiceover: "Открываем профиль: описание, условия и объяснение рекомендации. Здесь же — форма заявки. В текущем демо она показывает сценарий записи без отправки подрядчику."
 - type: feature_showcase
@@ -169,7 +169,7 @@ Scene 1 (0–2s): профиль крупным планом. Scene 2 (2–4s): 
 - duration: 8s
 - poster: 4s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/09.html
 - voiceover: "Шестьдесят шесть профилей. Строгие фильтры. Понятные рекомендации. Основной подбор работает даже без искусственного интеллекта. Меньше поиска — больше внимания вашему событию."
 - type: feature_showcase
@@ -188,7 +188,7 @@ Scene 1 (0–2s): оранжевый кадр, число 66. Scene 2 (2–4.5s)
 - duration: 8s
 - poster: 4s
 - transition_in: cut
-- status: outline
+- status: animated
 - src: compositions/frames/10.html
 - voiceover: "Сии лект. Ваш повод. Ваша команда. Работа команды эн экс ти."
 - type: branding
