@@ -6,6 +6,7 @@ use Laravel\Ai\StructuredAnonymousAgent;
 
 beforeEach(function () {
     config(['contractors.ai_enabled' => false]);
+    app()->setLocale('ru');
 });
 
 function contractorCriteria(array $overrides = []): array

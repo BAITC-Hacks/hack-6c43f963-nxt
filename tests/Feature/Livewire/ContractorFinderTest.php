@@ -5,6 +5,8 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     config(['contractors.ai_enabled' => false]);
+    session()->put('locale', 'ru');
+    app()->setLocale('ru');
 });
 
 it('serves a public finder and searches without database queries', function () {

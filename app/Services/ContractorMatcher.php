@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
  * @phpstan-import-type Contractor from ContractorCatalog
  *
  * @phpstan-type Criteria array{city: string, date: string, category: string, event_format: string, budget: int, hours: ?int, language: ?string}
- * @phpstan-type MatchResult array{status: string, total: int, eligible: int, reasons: array<string, int>, contractors: list<array{profile: Contractor, explanation: string}>, ranking: string}
+ * @phpstan-type MatchResult array{status: string, total: int, eligible: int, reasons: array<string, int>, contractors: list<array{profile: Contractor, explanation: string, excerpt: string}>, ranking: string}
  */
 class ContractorMatcher
 {
@@ -58,6 +58,7 @@ class ContractorMatcher
             $cards[] = [
                 'profile' => $profile,
                 'explanation' => $this->explain($criteria, $profile, $selection['explanation']),
+                'excerpt' => $selection['explanation'],
             ];
         }
 
@@ -75,22 +76,24 @@ class ContractorMatcher
      * @param  Criteria  $criteria
      * @param  Contractor  $profile
      */
-    private function explain(array $criteria, array $profile, string $excerpt): string
+    public function explain(array $criteria, array $profile, string $excerpt): string
     {
         $price = number_format($profile['price_from_kzt'], 0, '.', ' ');
         $budget = number_format($criteria['budget'], 0, '.', ' ');
-        $details = "Формат «{$criteria['event_format']}» указан в профиле; цена от {$price} ₸ укладывается в бюджет {$budget} ₸";
+        $details = __('Формат «:format» указан в профиле; цена от :price ₸ укладывается в бюджет :budget ₸', [
+            'format' => __($criteria['event_format']), 'price' => $price, 'budget' => $budget,
+        ]);
 
         if ($criteria['language'] !== null) {
-            $details .= "; язык работы — {$criteria['language']}";
+            $details .= __('; язык работы — :language', ['language' => __($criteria['language'])]);
         }
 
         if ($criteria['hours'] !== null) {
             $details .= $profile['max_hours'] === null
-                ? '; длительность нужно уточнить — лимит часов не указан'
-                : "; длительность {$criteria['hours']} ч укладывается в лимит {$profile['max_hours']} ч";
+                ? __('; длительность нужно уточнить — лимит часов не указан')
+                : __('; длительность :hours ч укладывается в лимит :max ч', ['hours' => $criteria['hours'], 'max' => $profile['max_hours']]);
         }
 
-        return $details.'. Из описания: «'.$excerpt.'»';
+        return $details.__('. Из описания: «:excerpt» (язык оригинала).', ['excerpt' => $excerpt]);
     }
 }
