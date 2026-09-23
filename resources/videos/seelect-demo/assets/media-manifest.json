@@ -1,0 +1,102 @@
+[
+  {
+    "id": "voice-1",
+    "type": "voice",
+    "file": "assets/audio/voice-1.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 8,
+    "sourceDuration": 7.862857142857143,
+    "tempo": 1.040926640926641
+  },
+  {
+    "id": "voice-2",
+    "type": "voice",
+    "file": "assets/audio/voice-2.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 6,
+    "sourceDuration": 7.340408163265306,
+    "tempo": 1.329705215419501
+  },
+  {
+    "id": "voice-3",
+    "type": "voice",
+    "file": "assets/audio/voice-3.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 10,
+    "sourceDuration": 12.09469387755102,
+    "tempo": 1.269648284845853
+  },
+  {
+    "id": "voice-4",
+    "type": "voice",
+    "file": "assets/audio/voice-4.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 10,
+    "sourceDuration": 12.225306122448979,
+    "tempo": 1.2835432045158488
+  },
+  {
+    "id": "voice-5",
+    "type": "voice",
+    "file": "assets/audio/voice-5.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 8,
+    "sourceDuration": 11.38938775510204,
+    "tempo": 1.5174848317705458
+  },
+  {
+    "id": "voice-6",
+    "type": "voice",
+    "file": "assets/audio/voice-6.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 7,
+    "sourceDuration": 9.247346938775511,
+    "tempo": 1.4198979591836736
+  },
+  {
+    "id": "voice-7",
+    "type": "voice",
+    "file": "assets/audio/voice-7.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 11,
+    "sourceDuration": 10.24,
+    "tempo": 1
+  },
+  {
+    "id": "voice-8",
+    "type": "voice",
+    "file": "assets/audio/voice-8.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 9,
+    "sourceDuration": 10.736326530612246,
+    "tempo": 1.259086491739553
+  },
+  {
+    "id": "voice-9",
+    "type": "voice",
+    "file": "assets/audio/voice-9.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 8,
+    "sourceDuration": 11.284897959183674,
+    "tempo": 1.5033645890788747
+  },
+  {
+    "id": "voice-10",
+    "type": "voice",
+    "file": "assets/audio/voice-10.wav",
+    "provider": "HeyGen Starfish",
+    "voice": "Godric - Firm & Measured",
+    "duration": 8,
+    "sourceDuration": 5.825306122448979,
+    "tempo": 1
+  }
+]
