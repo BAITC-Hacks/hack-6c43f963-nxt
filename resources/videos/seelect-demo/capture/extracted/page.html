@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<style>[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.list-item][wire\:loading\.list-item], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak="x-cloak"],[x-cloak=""] {display: none !important;}[wire\:cloak="wire:cloak"],[wire\:cloak=""] {display: none !important;}dialog#livewire-error::backdrop {background-color: rgba(0, 0, 0, .6);}</style>
+<style>/* Make clicks pass-through */
+
+    #nprogress {
+      pointer-events: none;
+    }
+
+    #nprogress .bar {
+      background: var(--livewire-progress-bar-color, #29d);
+
+      position: fixed;
+      z-index: 1031;
+      top: 0;
+      left: 0;
+
+      width: 100%;
+      height: 2px;
+    }
+
+    /* Fancy blur effect */
+    #nprogress .peg {
+      display: block;
+      position: absolute;
+      right: 0px;
+      width: 100px;
+      height: 100%;
+      box-shadow: 0 0 10px var(--livewire-progress-bar-color, #29d), 0 0 5px var(--livewire-progress-bar-color, #29d);
+      opacity: 1.0;
+
+      -webkit-transform: rotate(3deg) translate(0px, -4px);
+          -ms-transform: rotate(3deg) translate(0px, -4px);
+              transform: rotate(3deg) translate(0px, -4px);
+    }
+
+    /* Remove these to get rid of the spinner */
+    #nprogress .spinner {
+      display: block;
+      position: fixed;
+      z-index: 1031;
+      top: 15px;
+      right: 15px;
+    }
+
+    #nprogress .spinner-icon {
+      width: 18px;
+      height: 18px;
+      box-sizing: border-box;
+
+      border: solid 2px transparent;
+      border-top-color: var(--livewire-progress-bar-color, #29d);
+      border-left-color: var(--livewire-progress-bar-color, #29d);
+      border-radius: 50%;
+
+      -webkit-animation: nprogress-spinner 400ms linear infinite;
+              animation: nprogress-spinner 400ms linear infinite;
+    }
+
+    .nprogress-custom-parent {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .nprogress-custom-parent #nprogress .spinner,
+    .nprogress-custom-parent #nprogress .bar {
+      position: absolute;
+    }
+
+    @-webkit-keyframes nprogress-spinner {
+      0%   { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+    @keyframes nprogress-spinner {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    </style>
+<style>/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/ibmplexsans/v23/zYXEKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbM4jw8V78x9OWIhqbQ5g3voKE7-jfBVSl7w.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/ibmplexsans/v23/zYXEKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbM4jw8V78x9OWIhqbQ5g-voKE7-jfBVSl7w.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/ibmplexsans/v23/zYXEKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbM4jw8V78x9OWIhqbQ5g5voKE7-jfBVSl7w.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/ibmplexsans/v23/zYXEKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbM4jw8V78x9OWIhqbQ5g1voKE7-jfBVSl7w.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/ibmplexsans/v23/zYXEKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbM4jw8V78x9OWIhqbQ5g0voKE7-jfBVSl7w.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/ibmplexsans/v23/zYXEKVElMYYaJe8bpLHnCwDKhdTEG46kmUZQCX598fQbM4jw8V78x9OWIhqbQ5g6voKE7-jfBVQ.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYbSB4Zh.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYbSB4Zh.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYbSB4Zh.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxTKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxaKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxdKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxRKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxQKYbSB4ZhRNU.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/fonts/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYbSB4Zh.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<script type="module" src="http://localhost:8000/build/assets/app-BvRk9kiK.js" data-navigate-track="reload"></script>
+<script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://localhost:8000/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+    const captureTypes = ["error","warning","info","log","debug","table"];
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        debug: console.debug,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Walk own enumerable keys so JSON.stringify cannot auto-invoke a proxy fake toJSON (e.g. Livewire's `$wire`) and fire a real request.
+    function toSafeValue(value, seen) {
+        if (value === null || typeof value !== 'object') {
+            return value;
+        }
+        if (value instanceof Error) {
+            return { name: value.name, message: value.message, stack: value.stack };
+        }
+        // Date has no own enumerable keys, so the walk below would collapse it to {}.
+        if (value instanceof Date) {
+            return value.toISOString();
+        }
+        if (seen.has(value)) {
+            return '[Circular]';
+        }
+        seen.add(value);
+        if (Array.isArray(value)) {
+            return value.map((item) => toSafeValue(item, seen));
+        }
+        const plain = {};
+        for (const key of Object.keys(value)) {
+            if (key === 'toJSON') continue;
+            try {
+                plain[key] = toSafeValue(value[key], seen);
+            } catch (e) {
+                plain[key] = '[Unreadable]';
+            }
+        }
+        return plain;
+    }
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        return JSON.stringify(toSafeValue(obj, new WeakSet()));
+    }
+
+    // Normalize log type for consistency (e.g., 'warn' to 'warning')
+    function normalizeType(type) {
+        return type === 'warn' ? 'warning' : type;
+    }
+
+    // Determine if a log type should be captured based on configured levels
+    function shouldCapture(type) {
+        return captureTypes.includes(normalizeType(type));
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'debug', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                if (!shouldCapture(method)) {
+                    return;
+                }
+
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            if (shouldCapture('error')) {
+                logQueue.push({
+                    type: 'uncaught_error',
+                    timestamp: new Date().toISOString(),
+                    data: [{
+                        message: errorMsg,
+                        filename: url,
+                        lineno: lineNumber,
+                        colno: colNumber,
+                        error: error ? {
+                            name: error.name,
+                            message: error.message,
+                            stack: error.stack
+                        } : null
+                    }],
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            }
+
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            if (!shouldCapture('error')) {
+                return false;
+            }
+
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            if (!shouldCapture('error')) {
+                return false;
+            }
+
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: toSafeValue(event.reason, new WeakSet())
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+<body>
+
+        <div wire:snapshot="{&quot;data&quot;:{&quot;locale&quot;:&quot;kk&quot;,&quot;city&quot;:&quot;\u0410\u043b\u043c\u0430\u0442\u044b&quot;,&quot;date&quot;:&quot;2026-09-23&quot;,&quot;category&quot;:&quot;\u0412\u0435\u0434\u0443\u0449\u0438\u0439&quot;,&quot;event_format&quot;:&quot;\u0441\u0432\u0430\u0434\u044c\u0431\u0430&quot;,&quot;budget&quot;:&quot;1500000&quot;,&quot;hours&quot;:&quot;&quot;,&quot;language&quot;:&quot;&quot;,&quot;result&quot;:null,&quot;submitted&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;chatOpen&quot;:false,&quot;chatInput&quot;:&quot;&quot;,&quot;chatStep&quot;:&quot;city&quot;,&quot;chatBusy&quot;:false,&quot;chatNlp&quot;:false,&quot;pendingChatRaw&quot;:&quot;&quot;,&quot;chatMessages&quot;:[[[{&quot;role&quot;:&quot;assistant&quot;,&quot;text&quot;:&quot;\u0421\u04d9\u043b\u0435\u043c! \u041a\u0430\u0442\u0430\u043b\u043e\u0433\u0442\u0430\u043d \u043c\u0430\u043c\u0430\u043d\u0434\u0430\u0440\u0434\u044b \u0456\u0440\u0456\u043a\u0442\u0435\u0443\u0433\u0435 \u043a\u04e9\u043c\u0435\u043a\u0442\u0435\u0441\u0435\u043c\u0456\u043d. \u0406\u0441-\u0448\u0430\u0440\u0430 \u0442\u0443\u0440\u0430\u043b\u044b \u04e9\u0437 \u0441\u04e9\u0437\u0456\u04a3\u0456\u0437\u0431\u0435\u043d \u0430\u0439\u0442\u044b\u04a3\u044b\u0437 \u2014 \u049b\u0430\u043b\u0430, \u0444\u043e\u0440\u043c\u0430\u0442, \u043a\u0456\u043c \u043a\u0435\u0440\u0435\u043a, \u043a\u04af\u043d \u0436\u04d9\u043d\u0435 \u0431\u044e\u0434\u0436\u0435\u0442.&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;chatDraft&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;detailId&quot;:null,&quot;bookingName&quot;:&quot;&quot;,&quot;bookingPhone&quot;:&quot;&quot;,&quot;bookingNote&quot;:&quot;&quot;,&quot;bookingSent&quot;:false},&quot;memo&quot;:{&quot;id&quot;:&quot;Hgtkqb69dTY2kFINbNNq&quot;,&quot;name&quot;:&quot;pages::contractor-finder&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;kk&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;b09f5bb9a388ab2a5340aa720e99f4393729c3106154e737d97f56791d6165a0&quot;}" wire:effects="[]" wire:id="Hgtkqb69dTY2kFINbNNq" wire:name="pages::contractor-finder" class="finder" x-data="" x-on:locale-changed.window="document.documentElement.lang = $event.detail.locale; document.title = $event.detail.title; document.querySelector('meta[name=description]').content = $event.detail.description">
+    <a class="skip-link" href="#finder-form">Іріктеуге өту</a>
+    <header class="site-header shell">
+        <a class="wordmark" href="http://localhost:8000" aria-label="seelect — басты бет"><img src="http://localhost:8000/images/firebird-glyph.svg" width="24" height="31" alt="">seelect</a>
+        <div class="header-tools">
+            <nav class="language-switch" aria-label="Интерфейс тілі">
+                <button type="button" wire:click="switchLocale('kk')" aria-pressed="true" lang="kk">Қазақша</button>
+                <button type="button" wire:click="switchLocale('ru')" aria-pressed="false" lang="ru">Русский</button>
+            </nav>
+            <button type="button" class="chat-launch" wire:click="openChat" aria-controls="assistant-panel" aria-expanded="false">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7A2.5 2.5 0 0 1 17.5 16H9l-4 4v-4.5A2.5 2.5 0 0 1 4 13.5v-7Z" stroke="currentColor" stroke-width="1.6" /></svg>
+                ЖИ-чат
+            </button>
+            <a class="edition" href="#how-it-works">Қалай жұмыс істейді</a>
+        </div>
+    </header>
+
+    <main class="shell">
+        <section class="hero" aria-labelledby="finder-title">
+            <h1 id="finder-title">Сіздің мерекеңіз.<br><span class="hero-accent">Сіздің командаңыз.</span></h1>
+            <div class="hero-bottom">
+                <p>Іс-шараңызға лайық мамандарды табамыз. Күніне, бюджетіне және қажетіңізге сай.<br> Үйлену тойына, үлкен корпоративке немесе жақындарыңызбен өтетін мерекеге.</p>
+                <div class="hero-actions">
+                    <button type="button" class="text-link as-button" wire:click="openChat">ЖИ-ден сұрау <span aria-hidden="true">↗</span></button>
+                    <a class="text-link" href="#finder-form">Іріктеуді бастау <span aria-hidden="true">↘</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="finder-specs" aria-label="Таңдау себебімен">
+            <div class="finder-spec"><span class="spec-value">AI</span><span>Таңдау себебімен</span></div>
+            <div class="finder-spec"><span class="spec-value">03</span><span>3 ұсынысқа дейін</span></div>
+            <div class="finder-spec"><span class="spec-value spec-languages">KZ <span>/</span> RU</span><span>Интерфейс тілі</span></div>
+            <div class="finder-spec"><span class="spec-value">₸</span><span>Бюджет, ₸</span></div>
+        </section>
+
+        <section class="showcase" id="showcase" aria-labelledby="showcase-title" x-data="{ filter: 'all' }">
+            <div class="showcase-heading">
+                <div>
+                    <span class="eyebrow">Витрина</span>
+                    <h2 id="showcase-title">Іс-шара атмосферасы.</h2>
+                    <p>Каталогтағы форматтардың тірі кадрлары. Карточканы басыңыз — осы параметрлермен ЖИ-чат ашылады.</p>
+                </div>
+                <div class="showcase-filters" role="group" aria-label="Витрина сүзгісі">
+                    <button type="button" class="filter-chip" :aria-pressed="filter === 'all'" @click="filter = 'all'" aria-pressed="true">Барлығы</button>
+                    <button type="button" class="filter-chip" :aria-pressed="filter === 'свадьба'" @click="filter = 'свадьба'" aria-pressed="false">үйлену тойы</button>
+                    <button type="button" class="filter-chip" :aria-pressed="filter === 'корпоратив'" @click="filter = 'корпоратив'" aria-pressed="false">корпоратив</button>
+                    <button type="button" class="filter-chip" :aria-pressed="filter === 'той'" @click="filter = 'той'" aria-pressed="false">той</button>
+                </div>
+            </div>
+            <div class="showcase-grid">
+                <!--[if BLOCK]><![endif]-->                    <button type="button" wire:key="showcase-0" class="showcase-card" wire:click="useShowcase(0)" x-show="filter === 'all' || filter === 'свадьба'" x-transition.opacity.duration.200ms="">
+                        <img src="http://localhost:8000/images/showcase/showcase-wedding.jpg" alt="Үйлену тойы кеші" width="640" height="480" loading="eager" decoding="async">
+                        <span class="showcase-copy">
+                            <span class="showcase-meta">Жүргізуші · Алматы</span>
+                            <span class="showcase-name">Үйлену тойы кеші</span>
+                            <span class="showcase-caption">Жүргізушілер мен үлкен күннің атмосферасы</span>
+                        </span>
+                    </button>
+                                    <button type="button" wire:key="showcase-1" class="showcase-card" wire:click="useShowcase(1)" x-show="filter === 'all' || filter === 'свадьба'" x-transition.opacity.duration.200ms="">
+                        <img src="http://localhost:8000/images/showcase/showcase-florist.jpg" alt="Флористика" width="640" height="480" loading="eager" decoding="async">
+                        <span class="showcase-copy">
+                            <span class="showcase-meta">Флорист · Алматы</span>
+                            <span class="showcase-name">Флористика</span>
+                            <span class="showcase-caption">Зал мен фотоаймаққа арналған авторлық композициялар</span>
+                        </span>
+                    </button>
+                                    <button type="button" wire:key="showcase-2" class="showcase-card" wire:click="useShowcase(2)" x-show="filter === 'all' || filter === 'свадьба'" x-transition.opacity.duration.200ms="">
+                        <img src="http://localhost:8000/images/showcase/showcase-photo.jpg" alt="Фотография" width="640" height="480" loading="lazy" decoding="async">
+                        <span class="showcase-copy">
+                            <span class="showcase-meta">Фотограф · Алматы</span>
+                            <span class="showcase-name">Фотография</span>
+                            <span class="showcase-caption">Қойылымсыз тірі кадрлар</span>
+                        </span>
+                    </button>
+                                    <button type="button" wire:key="showcase-3" class="showcase-card" wire:click="useShowcase(3)" x-show="filter === 'all' || filter === 'той'" x-transition.opacity.duration.200ms="">
+                        <img src="http://localhost:8000/images/showcase/showcase-hall.jpg" alt="Банкет залы" width="640" height="480" loading="lazy" decoding="async">
+                        <span class="showcase-copy">
+                            <span class="showcase-meta">Банкет залы · Астана</span>
+                            <span class="showcase-name">Банкет залы</span>
+                            <span class="showcase-caption">Жарық, үстел және қонақтарға арналған кеңістік</span>
+                        </span>
+                    </button>
+                                    <button type="button" wire:key="showcase-4" class="showcase-card" wire:click="useShowcase(4)" x-show="filter === 'all' || filter === 'корпоратив'" x-transition.opacity.duration.200ms="">
+                        <img src="http://localhost:8000/images/showcase/showcase-host.jpg" alt="Корпоратив" width="640" height="480" loading="lazy" decoding="async">
+                        <span class="showcase-copy">
+                            <span class="showcase-meta">Жүргізуші · Алматы</span>
+                            <span class="showcase-name">Корпоратив</span>
+                            <span class="showcase-caption">Іскерлік және мерекелік кешке арналған жүргізушілер</span>
+                        </span>
+                    </button>
+                                    <button type="button" wire:key="showcase-5" class="showcase-card" wire:click="useShowcase(5)" x-show="filter === 'all' || filter === 'юбилей'" x-transition.opacity.duration.200ms="">
+                        <img src="http://localhost:8000/images/showcase/showcase-band.jpg" alt="Жанды музыка тобы" width="640" height="480" loading="lazy" decoding="async">
+                        <span class="showcase-copy">
+                            <span class="showcase-meta">Жанды музыка тобы · Алматы</span>
+                            <span class="showcase-name">Жанды музыка тобы</span>
+                            <span class="showcase-caption">Би алаңы мен кешкі асқа арналған тірі дыбыс</span>
+                        </span>
+                    </button>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </section>
+
+        <section class="brief-section" id="finder-form" aria-labelledby="brief-title">
+            <aside class="section-intro">
+                <span class="eyebrow">Сіздің шарттарыңыз</span>
+                <h2 id="brief-title">Не жоспарлап отырсыз?</h2>
+                <p>Іс-шара туралы айтыңыз — лайық нұсқаларды іріктейміз.</p>
+                <div class="calendar-note"><span aria-hidden="true">↗</span><div>Таңдау себебімен<strong>Каталог күнтізбесі: 2026 жылғы 23 қыркүйек — 31 желтоқсан.</strong></div></div>
+            </aside>
+
+            <form wire:submit="search" class="brief-form" aria-label="Іс-шара параметрлері" novalidate>
+                <p class="form-note">Үш нұсқаға дейін және таңдау себептерін көрсетеміз</p>
+                <fieldset wire:loading.attr="disabled" wire:target="search">
+                    <legend class="sr-only">Іс-шара параметрлері</legend>
+                    <div class="field-grid">
+                        <div class="field">
+                            <label for="city">Қала <span aria-hidden="true">*</span></label>
+                            <select id="city" wire:model="city" required aria-invalid="false">
+                                <option value="">Қаланы таңдаңыз</option>
+                                <!--[if BLOCK]><![endif]-->                                    <option wire:key="city-0" value="Алматы">Алматы</option>
+                                                                    <option wire:key="city-1" value="Астана">Астана</option>
+                                                                    <option wire:key="city-2" value="Зарубежье">Шетел</option>
+                                <!--[if ENDBLOCK]><![endif]-->                            </select>
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                        </div>
+                        <div class="field">
+                            <label for="event_format">Іс-шара түрі <span aria-hidden="true">*</span></label>
+                            <select id="event_format" wire:model="event_format" required aria-invalid="false">
+                                <option value="">Форматты таңдаңыз</option>
+                                <!--[if BLOCK]><![endif]-->                                    <option wire:key="format-0" value="день рождения">Туған күн</option>
+                                                                    <option wire:key="format-1" value="конференция">Конференция</option>
+                                                                    <option wire:key="format-2" value="корпоратив">Корпоратив</option>
+                                                                    <option wire:key="format-3" value="свадьба">Үйлену тойы</option>
+                                                                    <option wire:key="format-4" value="той">Той</option>
+                                                                    <option wire:key="format-5" value="юбилей">Мерейтой</option>
+                                <!--[if ENDBLOCK]><![endif]-->                            </select>
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                        </div>
+                        <div class="field">
+                            <label for="category">Маман санаты <span aria-hidden="true">*</span></label>
+                            <select id="category" wire:model="category" required aria-invalid="false">
+                                <option value="">Санатты таңдаңыз</option>
+                                <!--[if BLOCK]><![endif]-->                                    <option wire:key="category-0" value="Банкетный зал">Банкет залы</option>
+                                                                    <option wire:key="category-1" value="Ведущий">Жүргізуші</option>
+                                                                    <option wire:key="category-2" value="Ведущий церемонии">Рәсім жүргізушісі</option>
+                                                                    <option wire:key="category-3" value="Видеограф">Бейнеоператор</option>
+                                                                    <option wire:key="category-4" value="Декоратор">Безендіруші</option>
+                                                                    <option wire:key="category-5" value="Загородная площадка">Қала сыртындағы алаң</option>
+                                                                    <option wire:key="category-6" value="Инструменталист">Аспапта орындаушы</option>
+                                                                    <option wire:key="category-7" value="Лайв-бэнд">Жанды музыка тобы</option>
+                                                                    <option wire:key="category-8" value="Национальный ансамбль">Ұлттық ансамбль</option>
+                                                                    <option wire:key="category-9" value="Отель">Қонақүй</option>
+                                                                    <option wire:key="category-10" value="Подарки и сувениры">Сыйлықтар мен кәдесыйлар</option>
+                                                                    <option wire:key="category-11" value="Ресторан">Мейрамхана</option>
+                                                                    <option wire:key="category-12" value="Танцевальный коллектив">Би ұжымы</option>
+                                                                    <option wire:key="category-13" value="Флорист">Флорист</option>
+                                                                    <option wire:key="category-14" value="Фото и видеобудки">Фото және бейне кабиналар</option>
+                                                                    <option wire:key="category-15" value="Фотограф">Фотограф</option>
+                                                                    <option wire:key="category-16" value="Шоу-программа">Шоу-бағдарлама</option>
+                                <!--[if ENDBLOCK]><![endif]-->                            </select>
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                        </div>
+                        <div class="field">
+                            <label for="date">Іс-шара күні <span aria-hidden="true">*</span></label>
+                            <input id="date" type="date" wire:model="date" min="2026-09-23" max="2026-12-31" required aria-invalid="false">
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                        </div>
+                        <div class="field field-wide">
+                            <label for="budget">Бюджет, ₸ <span aria-hidden="true">*</span></label>
+                            <input id="budget" type="number" wire:model="budget" min="1" max="1000000000" step="1" placeholder="500000" required aria-invalid="false">
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                        </div>
+                        <div class="field">
+                            <label for="hours">Ұзақтығы, сағат <span class="optional">Міндетті емес</span></label>
+                            <input id="hours" type="number" wire:model="hours" min="1" max="24" step="1" placeholder="Міндетті емес" aria-invalid="false">
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                        </div>
+                        <div class="field">
+                            <label for="language">Жұмыс тілі <span class="optional">Міндетті емес</span></label>
+                            <select id="language" wire:model="language" aria-invalid="false">
+                                <option value="">Кез келген</option>
+                                <!--[if BLOCK]><![endif]-->                                    <option wire:key="language-0" value="английский">Ағылшын тілі</option>
+                                                                    <option wire:key="language-1" value="казахский">Қазақ тілі</option>
+                                                                    <option wire:key="language-2" value="русский">Орыс тілі</option>
+                                <!--[if ENDBLOCK]><![endif]-->                            </select>
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                        </div>
+                    </div>
+                    <button class="submit-button" type="submit" wire:loading.attr="disabled" wire:target="search">
+                        <span wire:loading.remove="" wire:target="search">Мамандарды іріктеу</span>
+                        <span wire:loading="" wire:target="search">Нұсқаларды іріктеп жатырмыз…</span>
+                        <span aria-hidden="true">↗</span>
+                    </button>
+                </fieldset>
+            </form>
+        </section>
+
+        <section class="results-section" id="results-anchor" aria-live="polite" aria-atomic="true" aria-label="Іріктеу нәтижелері">
+            <span class="eyebrow">Сізге арналған ұсыныстар</span>
+            <p wire:loading="" wire:target="search" role="status">Бос күндерді тексеріп, нұсқаларды іріктеп жатырмыз…</p>
+            <div wire:loading.remove="" wire:target="search">
+                <!--[if BLOCK]><![endif]-->                    <h2>Түсіндірмесі бар іріктеу.</h2>
+                    <div class="empty-state">
+                        <span class="empty-symbol" aria-hidden="true">✳</span>
+                        <div>
+                            <h3>Мұнда сіздің нұсқаларыңыз шығады</h3>
+                            <p>Жоғарыдағы форманы толтырыңыз. Әр нәтиже үшін оның іс-шараңызға неге сай келетінін айтамыз.</p>
+                        </div>
+                    </div>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </section>
+
+        <section id="how-it-works" class="process" aria-labelledby="process-title">
+            <span class="eyebrow">Қалай жұмыс істейді</span>
+            <h2 id="process-title">Іздеуге аз уақыт.<br><em>Мерекеге көп көңіл.</em></h2>
+            <div class="process-steps">
+                <!--[if BLOCK]><![endif]-->                    <div wire:key="step-01" class="process-step">
+                        <span>01</span>
+                        <h3>Сіздің шарттарыңыз</h3>
+                        <p>Қаланы, күнді және бюджетті көрсетіңіз. Тіл мен ұзақтықты қалауыңызша таңдаңыз.</p>
+                    </div>
+                                    <div wire:key="step-02" class="process-step">
+                        <span>02</span>
+                        <h3>Нақты іріктеу</h3>
+                        <p>Бос уақыт пен шарттарды каталог бойынша тексереміз. Нұсқалар болмаса, себебін түсіндіреміз.</p>
+                    </div>
+                                    <div wire:key="step-03" class="process-step">
+                        <span>03</span>
+                        <h3>Түсінікті таңдау</h3>
+                        <p>Салыстыруға ыңғайлы болуы үшін деректері мен сипаттамасы бар үш профильге дейін көрсетеміз.</p>
+                    </div>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </section>
+    </main>
+    <footer class="site-footer shell">
+        <a class="wordmark" href="http://localhost:8000" aria-label="seelect — басты бет"><img src="http://localhost:8000/images/firebird-glyph.svg" width="24" height="31" alt="">seelect</a>
+        <p>seelect / Іс-шараңызға арналған каталог</p>
+        <span class="edition">Демо · Күз — қыс 2026 · Жазылу өтінімі</span>
+    </footer>
+    <div class="brand-signoff shell" aria-hidden="true"><span>seelect</span><img src="http://localhost:8000/images/firebird-glyph.svg" width="218" height="284" alt="" loading="lazy"></div>
+
+    <div id="assistant-panel" class="chat-panel" role="dialog" aria-modal="true" aria-labelledby="chat-title" hidden x-data="" x-on:chat-finished.window="$el.querySelector('.chat-log')?.scrollTo({ top: 99999, behavior: 'smooth' })">
+        <div class="chat-scrim" wire:click="closeChat" aria-hidden="true"></div>
+        <div class="chat-sheet">
+            <header class="chat-header">
+                <div>
+                    <p class="eyebrow" id="chat-title">ЖИ-көмекші</p>
+                    <p class="chat-subtitle">Alem qwen3-8 арқылы тірі диалог. Соңында — үш карточкаға дейін.</p>
+                </div>
+                <div class="chat-header-actions">
+                    <button type="button" class="chat-icon-btn" wire:click="restartChat" aria-label="Қайта бастау">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.7M20 12a8 8 0 0 1-13.7 5.7" stroke="currentColor" stroke-width="1.6" /><path d="M18 3v5h-5M6 21v-5h5" stroke="currentColor" stroke-width="1.6" /></svg>
+                    </button>
+                    <button type="button" class="chat-icon-btn" wire:click="closeChat" aria-label="Чатты жабу">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" /></svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="chat-log" role="log" aria-live="polite" aria-relevant="additions">
+                <!--[if BLOCK]><![endif]-->                    <div wire:key="chat-msg-0" class="chat-bubble chat-assistant">Сәлем! Каталогтан мамандарды іріктеуге көмектесемін. Іс-шара туралы өз сөзіңізбен айтыңыз — қала, формат, кім керек, күн және бюджет.</div>
+                <!--[if ENDBLOCK]><![endif]-->                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            </div>
+
+            <!--[if BLOCK]><![endif]-->                <div class="chat-chips" role="group" aria-label="Жылдам жауаптар">
+                    <!--[if BLOCK]><![endif]-->                        <button type="button" wire:key="chip-city-Алматы" class="chip" wire:click="selectChatChip('Алматы')" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn">Алматы</button>
+                                            <button type="button" wire:key="chip-city-Астана" class="chip" wire:click="selectChatChip('Астана')" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn">Астана</button>
+                                            <button type="button" wire:key="chip-city-Зарубежье" class="chip" wire:click="selectChatChip('Зарубежье')" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn">Шетел</button>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                </div>
+                <form wire:submit="sendChatMessage" class="chat-compose">
+                    <label class="sr-only" for="chat-input">Сіздің жауабыңыз</label>
+                    <input id="chat-input" type="text" wire:model.live="chatInput" autocomplete="off" placeholder="Досыңызға жазғандай жазыңыз…" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn">
+                    <button type="submit" class="chat-send" wire:loading.attr="disabled" wire:target="selectChatChip, sendChatMessage, skipChatStep, completeChatTurn" aria-label="Жіберу">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11.5 19 4l-4.5 16L11 13z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" /></svg>
+                    </button>
+                </form>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+    </div>
+
+        <div id="contractor-detail" class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detail-title" hidden>
+        <div class="chat-scrim" wire:click="closeContractorDetail" aria-hidden="true"></div>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </div>
+</div>
+        <script src="http://localhost:8000/flux/flux.js?id=c60bf509" data-navigate-once=""></script>
+    <!-- Livewire Scripts -->
+<script src="http://localhost:8000/livewire-13ee9c58/livewire.js?id=0ae8dee3" data-csrf="awJ6rTJUpJWV3LuRI7I2whlDoRe8aVarGUs1FcVG" data-module-url="http://localhost:8000/livewire-13ee9c58" data-update-uri="http://localhost:8000/livewire-13ee9c58/update" data-navigate-once="true"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+{
+  "typography": [
+    {
+      "role": "display",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "84px",
+      "fontWeight": "500",
+      "lineHeight": "88.2px",
+      "letterSpacing": "-1.68px",
+      "color": "#0E0D0D",
+      "sampleText": "Сіздің мерекеңіз.Сіздің командаңыз."
+    },
+    {
+      "role": "heading",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "42px",
+      "fontWeight": "500",
+      "lineHeight": "46.2px",
+      "letterSpacing": "-0.84px",
+      "color": "#0E0D0D",
+      "sampleText": "Іс-шара атмосферасы."
+    },
+    {
+      "role": "link",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "34px",
+      "fontWeight": "500",
+      "lineHeight": "52.7px",
+      "letterSpacing": "-1.5px",
+      "color": "#0E0D0D",
+      "sampleText": "seelect"
+    },
+    {
+      "role": "heading-3",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "21px",
+      "fontWeight": "500",
+      "lineHeight": "32.55px",
+      "letterSpacing": "normal",
+      "color": "#0E0D0D",
+      "sampleText": "Мұнда сіздің нұсқаларыңыз шығады"
+    },
+    {
+      "role": "heading-3",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "18px",
+      "fontWeight": "500",
+      "lineHeight": "27.9px",
+      "letterSpacing": "normal",
+      "color": "#0E0D0D",
+      "sampleText": "Сіздің шарттарыңыз"
+    },
+    {
+      "role": "body",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "18px",
+      "fontWeight": "400",
+      "lineHeight": "29.25px",
+      "letterSpacing": "normal",
+      "color": "#626161",
+      "sampleText": "Іс-шараңызға лайық мамандарды табамыз. Күніне, бюджетіне жән"
+    },
+    {
+      "role": "body-small",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "13px",
+      "fontWeight": "400",
+      "lineHeight": "20.15px",
+      "letterSpacing": "normal",
+      "color": "#626161",
+      "sampleText": "Жүргізушілер мен үлкен күннің атмосферасы"
+    },
+    {
+      "role": "label",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "13px",
+      "fontWeight": "600",
+      "lineHeight": "20.15px",
+      "letterSpacing": "normal",
+      "color": "#0E0D0D",
+      "sampleText": "Қала *"
+    }
+  ],
+  "spacing": {
+    "observed": [
+      6,
+      8,
+      9,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      28,
+      30,
+      32,
+      40
+    ],
+    "baseUnit": 8
+  },
+  "radius": [],
+  "shadows": [],
+  "buttons": [
+    {
+      "label": "Қазақша",
+      "background": "#0E0D0D",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#FFFFFF",
+      "padding": "6px 10px",
+      "borderRadius": "0px",
+      "border": "1px solid rgb(14, 13, 13)",
+      "boxShadow": "none",
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "height": "36px"
+    },
+    {
+      "label": "ЖИ-чат",
+      "background": "#F86130",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#0E0D0D",
+      "padding": "8px 12px",
+      "borderRadius": "0px",
+      "border": "1px solid rgb(248, 97, 48)",
+      "boxShadow": "none",
+      "fontSize": "12px",
+      "fontWeight": "600",
+      "height": "40px"
+    },
+    {
+      "label": "үйлену тойы",
+      "background": "#FFFFFF",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#0E0D0D",
+      "padding": "8px 12px",
+      "borderRadius": "0px",
+      "border": "1px solid rgb(226, 226, 226)",
+      "boxShadow": "none",
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "height": "40px"
+    }
+  ],
+  "cards": [
+    {
+      "label": "card",
+      "background": "#FFFFFF",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#0E0D0D",
+      "padding": "0px",
+      "borderRadius": "0px",
+      "border": "1px solid rgb(226, 226, 226)",
+      "boxShadow": "none",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "height": "334.375px"
+    }
+  ],
+  "nav": {
+    "label": "navigation",
+    "background": "transparent",
+    "backgroundImage": "",
+    "backdropFilter": "",
+    "color": "#0E0D0D",
+    "padding": "0px",
+    "borderRadius": "0px",
+    "border": "0px solid oklch(0.928 0.006 264.531)",
+    "boxShadow": "none",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "height": "72px"
+  },
+  "chips": [
+    {
+      "label": "Барлығы",
+      "background": "#0E0D0D",
+      "color": "#FFFFFF",
+      "padding": "8px 12px",
+      "borderRadius": "0px",
+      "border": "1px solid rgb(14, 13, 13)",
+      "boxShadow": "none",
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "height": "40px"
+    },
+    {
+      "label": "үйлену тойы",
+      "background": "#FFFFFF",
+      "color": "#0E0D0D",
+      "padding": "8px 12px",
+      "borderRadius": "0px",
+      "border": "1px solid rgb(226, 226, 226)",
+      "boxShadow": "none",
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "height": "40px"
+    }
+  ],
+  "statCells": [],
+  "tabs": [],
+  "backgrounds": [
+    {
+      "value": "linear-gradient(90deg, rgb(229, 50, 43), rgb(248, 97, 48) 65%, rgb(251, 138, 53))",
+      "area": 73088
+    }
+  ],
+  "glass": []
+}
