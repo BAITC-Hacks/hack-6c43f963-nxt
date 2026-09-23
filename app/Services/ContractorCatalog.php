@@ -4,10 +4,13 @@ namespace App\Services;
 
 use RuntimeException;
 
+/**
+ * @phpstan-type Contractor array{id: string, anon_name: string, city: string, description: string, categories: list<string>, event_formats: list<string>, languages: list<string>, busy_dates: list<string>, price_from_kzt: int, max_hours: ?int, synthetic: bool, city_imputed: bool, price_imputed: bool}
+ */
 class ContractorCatalog
 {
     /**
-     * @return list<array<string, string|int|bool|null|list<string>>>
+     * @return list<Contractor>
      */
     public function all(): array
     {
@@ -46,22 +49,24 @@ class ContractorCatalog
                     throw new RuntimeException("Invalid contractor catalog CSV row: {$path}");
                 }
 
-                $contractor = array_combine($header, $values);
+                $raw = array_combine($header, array_map(fn (?string $value): string => $value ?? '', $values));
+                $contractor = $raw;
 
                 foreach (['categories', 'event_formats', 'languages', 'busy_dates'] as $field) {
                     $contractor[$field] = array_values(array_filter(
-                        array_map('trim', explode('|', $contractor[$field])),
+                        array_map('trim', explode('|', $raw[$field])),
                         fn (string $value): bool => $value !== '',
                     ));
                 }
 
-                $contractor['price_from_kzt'] = (int) $contractor['price_from_kzt'];
-                $contractor['max_hours'] = trim($contractor['max_hours']) === '' ? null : (int) $contractor['max_hours'];
+                $contractor['price_from_kzt'] = (int) $raw['price_from_kzt'];
+                $contractor['max_hours'] = trim($raw['max_hours']) === '' ? null : (int) $raw['max_hours'];
 
                 foreach (['synthetic', 'city_imputed', 'price_imputed'] as $field) {
-                    $contractor[$field] = filter_var($contractor[$field], FILTER_VALIDATE_BOOLEAN);
+                    $contractor[$field] = filter_var($raw[$field], FILTER_VALIDATE_BOOLEAN);
                 }
 
+                /** @var Contractor $contractor */
                 $contractors[] = $contractor;
             }
 
