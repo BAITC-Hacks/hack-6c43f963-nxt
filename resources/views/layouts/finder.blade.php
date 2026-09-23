@@ -5,7 +5,7 @@
         @vite('resources/css/finder.css')
         <meta name="description" content="{{ __('Подберите до трёх подрядчиков для мероприятия по городу, дате, бюджету и формату. С понятными причинами выбора.') }}">
     </head>
-    <body class="finder-page font-sans antialiased">
+    <body>
         {{ $slot }}
         @fluxScripts
     </body>
