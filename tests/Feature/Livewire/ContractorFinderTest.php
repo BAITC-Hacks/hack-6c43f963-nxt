@@ -106,3 +106,26 @@ it('accepts the last calendar date and optional constraints', function () {
         ->call('search')->assertHasNoErrors()
         ->assertSet('submitted.hours', 6)->assertSet('submitted.language', 'русский');
 });
+
+it('opens contractor detail with photo and accepts a booking request', function () {
+    $component = Livewire::test('pages::contractor-finder')
+        ->call('search')
+        ->assertSee('Мицури Канроджи')
+        ->assertSee('Записаться')
+        ->assertSee('images/contractors/portrait-', false);
+
+    $id = $component->get('result')['contractors'][0]['profile']['id'];
+
+    $component
+        ->call('openContractorDetail', $id)
+        ->assertSet('detailId', $id)
+        ->assertSee('Профиль специалиста')
+        ->assertSee('О специалисте')
+        ->set('bookingName', 'Айгерим')
+        ->set('bookingPhone', '+77001234567')
+        ->set('bookingNote', 'Нужен ведущий на вечер')
+        ->call('submitBooking')
+        ->assertHasNoErrors()
+        ->assertSet('bookingSent', true)
+        ->assertSee('Заявка отправлена');
+});

@@ -58,7 +58,7 @@ class AiContractorConversation
             ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
             $response = agent(
-                instructions: 'Ты живой консультант сервиса «повод.» по подбору event-подрядчиков в Казахстане. '
+                instructions: 'Ты живой консультант сервиса «seelect» по подбору event-подрядчиков в Казахстане. '
                     .'Говори естественно, коротко (1–3 предложения), на языке locale (kk или ru), без канцелярита и без markdown. '
                     .'Собирай только: city, event_format, category, date (YYYY-MM-DD), budget (целое тенге), language, hours. '
                     .'Значения city/event_format/category/language бери строго из allowed. Если пользователь сказал иначе — мягко уточни по списку. '

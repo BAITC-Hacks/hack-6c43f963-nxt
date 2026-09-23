@@ -5,10 +5,12 @@ namespace App\Services;
 use RuntimeException;
 
 /**
- * @phpstan-type Contractor array{id: string, anon_name: string, city: string, description: string, categories: list<string>, event_formats: list<string>, languages: list<string>, busy_dates: list<string>, price_from_kzt: int, max_hours: ?int, synthetic: bool, city_imputed: bool, price_imputed: bool}
+ * @phpstan-type Contractor array{id: string, anon_name: string, city: string, description: string, categories: list<string>, event_formats: list<string>, languages: list<string>, busy_dates: list<string>, price_from_kzt: int, max_hours: ?int, synthetic: bool, city_imputed: bool, price_imputed: bool, photo: string}
  */
 class ContractorCatalog
 {
+    private const int PHOTO_COUNT = 10;
+
     /**
      * @return list<Contractor>
      */
@@ -66,6 +68,8 @@ class ContractorCatalog
                     $contractor[$field] = filter_var($raw[$field], FILTER_VALIDATE_BOOLEAN);
                 }
 
+                $contractor['photo'] = $this->photoFor($raw['id']);
+
                 /** @var Contractor $contractor */
                 $contractors[] = $contractor;
             }
@@ -98,5 +102,29 @@ class ContractorCatalog
         }
 
         return $options;
+    }
+
+    /**
+     * Stable portrait path for a catalog id (pool of local photos).
+     */
+    public function photoFor(string $id): string
+    {
+        $index = (abs(crc32($id)) % self::PHOTO_COUNT) + 1;
+
+        return 'images/contractors/portrait-'.str_pad((string) $index, 2, '0', STR_PAD_LEFT).'.jpg';
+    }
+
+    /**
+     * @return Contractor|null
+     */
+    public function find(string $id): ?array
+    {
+        foreach ($this->all() as $contractor) {
+            if ($contractor['id'] === $id) {
+                return $contractor;
+            }
+        }
+
+        return null;
     }
 }

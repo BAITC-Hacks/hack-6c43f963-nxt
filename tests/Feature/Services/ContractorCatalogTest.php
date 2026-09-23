@@ -16,6 +16,7 @@ it('reads all 66 profiles and normalizes the supplied values without losing text
     expect($byId['HK-39372']['synthetic'])->toBeFalse();
     expect($byId['HK-39372']['city_imputed'])->toBeFalse();
     expect($byId['HK-39372']['price_imputed'])->toBeTrue();
+    expect($byId['HK-39372']['photo'])->toBe('images/contractors/portrait-'.str_pad((string) ((abs(crc32('HK-39372')) % 10) + 1), 2, '0', STR_PAD_LEFT).'.jpg');
     expect($byId['HK-39372']['busy_dates'])->toHaveCount(52);
     expect($byId['HK-39372']['busy_dates'][0])->toBe('2026-09-25');
     expect($byId['HK-39372']['busy_dates'][51])->toBe('2026-12-31');

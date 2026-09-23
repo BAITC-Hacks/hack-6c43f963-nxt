@@ -48,6 +48,12 @@ new #[Layout('layouts.finder')] class extends Component {
     /** @var array<string, mixed> */
     public array $chatDraft = [];
 
+    public ?string $detailId = null;
+    public string $bookingName = '';
+    public string $bookingPhone = '';
+    public string $bookingNote = '';
+    public bool $bookingSent = false;
+
     public function mount(): void
     {
         $this->locale = app()->getLocale();
@@ -73,7 +79,7 @@ new #[Layout('layouts.finder')] class extends Component {
 
         $this->dispatch('locale-changed',
             locale: $locale,
-            title: __('Повод — подрядчики для вашего события'),
+            title: __('seelect — подрядчики для вашего события'),
             description: __('Подберите до трёх подрядчиков для мероприятия по городу, дате, бюджету и формату. С понятными причинами выбора.'),
         );
     }
@@ -103,9 +109,80 @@ new #[Layout('layouts.finder')] class extends Component {
         return app(ContractorChatGuide::class)->chips($this->chatStep);
     }
 
+    /**
+     * @return array{profile: array<string, mixed>, explanation: ?string}|null
+     */
+    #[Computed]
+    public function selectedContractor(): ?array
+    {
+        if ($this->detailId === null) {
+            return null;
+        }
+
+        if ($this->result !== null) {
+            foreach ($this->result['contractors'] as $card) {
+                if ($card['profile']['id'] === $this->detailId) {
+                    return [
+                        'profile' => $card['profile'],
+                        'explanation' => $card['explanation'] ?? null,
+                    ];
+                }
+            }
+        }
+
+        $profile = app(ContractorCatalog::class)->find($this->detailId);
+
+        if ($profile === null) {
+            return null;
+        }
+
+        return ['profile' => $profile, 'explanation' => null];
+    }
+
+    public function openContractorDetail(string $id): void
+    {
+        abort_unless(app(ContractorCatalog::class)->find($id) !== null, 404);
+
+        $this->detailId = $id;
+        $this->bookingSent = false;
+        $this->resetValidation(['bookingName', 'bookingPhone', 'bookingNote']);
+        $this->chatOpen = false;
+    }
+
+    public function closeContractorDetail(): void
+    {
+        $this->detailId = null;
+        $this->bookingSent = false;
+        $this->bookingName = '';
+        $this->bookingPhone = '';
+        $this->bookingNote = '';
+        $this->resetValidation(['bookingName', 'bookingPhone', 'bookingNote']);
+    }
+
+    public function submitBooking(): void
+    {
+        abort_unless($this->detailId !== null, 404);
+
+        $this->validate([
+            'bookingName' => ['required', 'string', 'min:2', 'max:80'],
+            'bookingPhone' => ['required', 'string', 'min:8', 'max:32'],
+            'bookingNote' => ['nullable', 'string', 'max:500'],
+        ], [
+            'bookingName.required' => __('Укажите ваше имя.'),
+            'bookingPhone.required' => __('Укажите телефон для связи.'),
+        ], [
+            'bookingName' => __('Имя'),
+            'bookingPhone' => __('Телефон'),
+            'bookingNote' => __('Комментарий'),
+        ]);
+
+        $this->bookingSent = true;
+    }
+
     public function openChat(): void
     {
         $this->chatOpen = true;
+        $this->detailId = null;
     }
 
     public function closeChat(): void
@@ -341,7 +418,7 @@ new #[Layout('layouts.finder')] class extends Component {
 <div class="finder" x-data x-on:locale-changed.window="document.documentElement.lang = $event.detail.locale; document.title = $event.detail.title; document.querySelector('meta[name=description]').content = $event.detail.description">
     <a class="skip-link" href="#finder-form">{{ __('Перейти к подбору') }}</a>
     <header class="site-header shell">
-        <a class="wordmark" href="{{ route('home') }}" aria-label="{{ __('Повод — главная') }}"><img src="{{ asset('images/firebird-glyph.svg') }}" width="24" height="31" alt="">nxt</a>
+        <a class="wordmark" href="{{ route('home') }}" aria-label="{{ __('seelect — главная') }}"><img src="{{ asset('images/firebird-glyph.svg') }}" width="24" height="31" alt="">seelect</a>
         <div class="header-tools">
             <nav class="language-switch" aria-label="{{ __('Язык интерфейса') }}">
                 <button type="button" wire:click="switchLocale('kk')" aria-pressed="{{ $locale === 'kk' ? 'true' : 'false' }}" lang="kk">Қазақша</button>
@@ -519,22 +596,30 @@ new #[Layout('layouts.finder')] class extends Component {
                         @endif
                         <div class="cards">
                             @foreach ($result['contractors'] as $card)
-                                <article wire:key="contractor-{{ $card['profile']['id'] }}" class="contractor-card">
+                                @php($profile = $card['profile'])
+                                <article wire:key="contractor-{{ $profile['id'] }}" class="contractor-card">
+                                    <button type="button" class="card-photo-btn" wire:click="openContractorDetail({{ \Illuminate\Support\Js::from($profile['id']) }})" aria-label="{{ __('Подробнее о :name', ['name' => $profile['anon_name']]) }}">
+                                        <img class="card-photo" src="{{ asset($profile['photo']) }}" alt="{{ $profile['anon_name'] }}" width="480" height="640" loading="lazy" decoding="async">
+                                    </button>
                                     <div class="card-top"><span class="eyebrow">0{{ $loop->iteration }}</span><span aria-hidden="true">↗</span></div>
-                                    @if ($card['profile']['synthetic'])
+                                    @if ($profile['synthetic'])
                                         <p class="synthetic-badge">{{ __('Синтетический профиль') }}</p>
                                     @endif
-                                    <h3>{{ $card['profile']['anon_name'] }}</h3>
-                                    <p class="card-meta">{{ implode(' · ', array_map(fn ($category) => __($category), $card['profile']['categories'])) }} · {{ __($card['profile']['city']) }}</p>
-                                    <p class="price">{{ __('от :price ₸', ['price' => number_format($card['profile']['price_from_kzt'], 0, '.', ' ')]) }}</p>
+                                    <h3>{{ $profile['anon_name'] }}</h3>
+                                    <p class="card-meta">{{ implode(' · ', array_map(fn ($category) => __($category), $profile['categories'])) }} · {{ __($profile['city']) }}</p>
+                                    <p class="price">{{ __('от :price ₸', ['price' => number_format($profile['price_from_kzt'], 0, '.', ' ')]) }}</p>
                                     <div class="explanation">
                                         <h4>{{ __('Почему подходит') }}</h4>
                                         <p>{{ $card['explanation'] }}</p>
                                     </div>
                                     <p class="card-footnote">{{ __('По календарю каталога дата свободна. Итоговую цену и доступность нужно подтвердить у подрядчика.') }}</p>
-                                    @if ($card['profile']['city_imputed'] || $card['profile']['price_imputed'])
-                                        <p class="imputed">{{ $card['profile']['city_imputed'] ? __('Город восстановлен в датасете. ') : '' }}{{ $card['profile']['price_imputed'] ? __('Цена оценочная из датасета.') : '' }}</p>
+                                    @if ($profile['city_imputed'] || $profile['price_imputed'])
+                                        <p class="imputed">{{ $profile['city_imputed'] ? __('Город восстановлен в датасете. ') : '' }}{{ $profile['price_imputed'] ? __('Цена оценочная из датасета.') : '' }}</p>
                                     @endif
+                                    <div class="card-actions">
+                                        <button type="button" class="text-link as-button" wire:click="openContractorDetail({{ \Illuminate\Support\Js::from($profile['id']) }})">{{ __('Подробнее') }} <span aria-hidden="true">↗</span></button>
+                                        <button type="button" class="card-book" wire:click="openContractorDetail({{ \Illuminate\Support\Js::from($profile['id']) }})">{{ __('Записаться') }}</button>
+                                    </div>
                                 </article>
                             @endforeach
                         </div>
@@ -583,11 +668,11 @@ new #[Layout('layouts.finder')] class extends Component {
         </section>
     </main>
     <footer class="site-footer shell">
-        <a class="wordmark" href="{{ route('home') }}" aria-label="{{ __('Повод — главная') }}"><img src="{{ asset('images/firebird-glyph.svg') }}" width="24" height="31" alt="">nxt</a>
-        <p>{{ __('повод. / Каталог для вашего события') }}</p>
-        <span class="edition">{{ __('Демо · Осень — зима 2026 · Без бронирования') }}</span>
+        <a class="wordmark" href="{{ route('home') }}" aria-label="{{ __('seelect — главная') }}"><img src="{{ asset('images/firebird-glyph.svg') }}" width="24" height="31" alt="">seelect</a>
+        <p>{{ __('seelect / Каталог для вашего события') }}</p>
+        <span class="edition">{{ __('Демо · Осень — зима 2026 · Заявка на запись') }}</span>
     </footer>
-    <div class="brand-signoff shell" aria-hidden="true"><span>nxt</span><img src="{{ asset('images/firebird-glyph.svg') }}" width="218" height="284" alt="" loading="lazy"></div>
+    <div class="brand-signoff shell" aria-hidden="true"><span>seelect</span><img src="{{ asset('images/firebird-glyph.svg') }}" width="218" height="284" alt="" loading="lazy"></div>
 
     <div
         id="assistant-panel"
@@ -657,5 +742,103 @@ new #[Layout('layouts.finder')] class extends Component {
                 </div>
             @endif
         </div>
+    </div>
+
+    @php($selected = $this->selectedContractor)
+    <div
+        id="contractor-detail"
+        class="detail-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="detail-title"
+        @if ($detailId === null || $selected === null) hidden @endif
+    >
+        <div class="chat-scrim" wire:click="closeContractorDetail" aria-hidden="true"></div>
+        @if ($selected !== null)
+            @php($profile = $selected['profile'])
+            <div class="detail-sheet" wire:key="detail-{{ $profile['id'] }}">
+                <header class="chat-header">
+                    <div>
+                        <p class="eyebrow" id="detail-title">{{ __('Профиль специалиста') }}</p>
+                        <p class="chat-subtitle">{{ $profile['id'] }} · {{ __($profile['city']) }}</p>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button type="button" class="chat-icon-btn" wire:click="closeContractorDetail" aria-label="{{ __('Закрыть') }}">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6"/></svg>
+                        </button>
+                    </div>
+                </header>
+
+                <div class="detail-body">
+                    <img class="detail-photo" src="{{ asset($profile['photo']) }}" alt="{{ $profile['anon_name'] }}" width="640" height="800" loading="lazy" decoding="async">
+                    <div class="detail-copy">
+                        <h2>{{ $profile['anon_name'] }}</h2>
+                        <p class="card-meta">{{ implode(' · ', array_map(fn ($category) => __($category), $profile['categories'])) }}</p>
+                        <p class="price">{{ __('от :price ₸', ['price' => number_format($profile['price_from_kzt'], 0, '.', ' ')]) }}</p>
+
+                        @if ($selected['explanation'])
+                            <div class="explanation">
+                                <h4>{{ __('Почему подходит') }}</h4>
+                                <p>{{ $selected['explanation'] }}</p>
+                            </div>
+                        @endif
+
+                        <div class="detail-facts">
+                            <div>
+                                <h4>{{ __('Форматы') }}</h4>
+                                <p>{{ implode(', ', array_map(fn ($format) => __($format), $profile['event_formats'])) }}</p>
+                            </div>
+                            <div>
+                                <h4>{{ __('Языки') }}</h4>
+                                <p>{{ $profile['languages'] === [] ? __('Любой') : implode(', ', array_map(fn ($lang) => __($lang), $profile['languages'])) }}</p>
+                            </div>
+                            <div>
+                                <h4>{{ __('Длительность') }}</h4>
+                                <p>{{ $profile['max_hours'] === null ? __('Уточняется') : __(':hours ч', ['hours' => $profile['max_hours']]) }}</p>
+                            </div>
+                            @if ($submitted !== [])
+                                <div>
+                                    <h4>{{ __('Дата мероприятия') }}</h4>
+                                    <p>{{ \Carbon\CarbonImmutable::parse($submitted['date'])->format('d.m.Y') }}</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="detail-description">
+                            <h4>{{ __('О специалисте') }}</h4>
+                            <p>{{ $profile['description'] }}</p>
+                        </div>
+
+                        @if ($bookingSent)
+                            <div class="booking-success" role="status">
+                                <h3>{{ __('Заявка отправлена') }}</h3>
+                                <p>{{ __('Мы передадим :name ваши контакты. Специалист свяжется с вами для подтверждения.', ['name' => $profile['anon_name']]) }}</p>
+                                <button type="button" class="chip" wire:click="closeContractorDetail">{{ __('Закрыть') }}</button>
+                            </div>
+                        @else
+                            <form wire:submit="submitBooking" class="booking-form" aria-label="{{ __('Запись к специалисту') }}">
+                                <h3>{{ __('Записаться') }}</h3>
+                                <p class="form-note">{{ __('Оставьте контакты — специалист подтвердит дату и условия.') }}</p>
+                                <div class="field">
+                                    <label for="booking-name">{{ __('Имя') }} <span aria-hidden="true">*</span></label>
+                                    <input id="booking-name" type="text" wire:model="bookingName" autocomplete="name" required @error('bookingName') aria-invalid="true" aria-describedby="booking-name-error" @enderror>
+                                    @error('bookingName') <p id="booking-name-error" class="field-error">{{ $message }}</p> @enderror
+                                </div>
+                                <div class="field">
+                                    <label for="booking-phone">{{ __('Телефон') }} <span aria-hidden="true">*</span></label>
+                                    <input id="booking-phone" type="tel" wire:model="bookingPhone" autocomplete="tel" required placeholder="+7 …" @error('bookingPhone') aria-invalid="true" aria-describedby="booking-phone-error" @enderror>
+                                    @error('bookingPhone') <p id="booking-phone-error" class="field-error">{{ $message }}</p> @enderror
+                                </div>
+                                <div class="field">
+                                    <label for="booking-note">{{ __('Комментарий') }}</label>
+                                    <textarea id="booking-note" wire:model="bookingNote" rows="3" maxlength="500" placeholder="{{ __('Пожелания к формату или времени') }}"></textarea>
+                                </div>
+                                <button class="submit-button" type="submit">{{ __('Отправить заявку') }} <span aria-hidden="true">↗</span></button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
