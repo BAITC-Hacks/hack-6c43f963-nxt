@@ -55,6 +55,9 @@ function exportScreen(Testable $component, string $name, string $selector, int $
     $extra .= $selector === '.chat-panel' ? '.chat-panel{position:absolute!important;inset:32px!important;width:calc(100% - 64px)!important;height:calc(100% - 64px)!important;max-height:none!important;transform:none!important}' : '';
     $page = '<!doctype html><html lang="ru"><head><meta charset="utf-8"><style>'.$font.$css.'html,body{width:'.$width.'px;height:'.$height.'px;overflow:hidden;scroll-behavior:auto}.finder{position:relative}.finder>*,main>*{display:none!important}main{display:block!important}'.$selection.'{display:flex!important}.shell{width:calc(100% - 80px)!important;max-width:1320px}.brief-section,.results-section{padding:45px 0!important}.hero{min-height:800px!important}.results-section{display:block!important}.reveal{opacity:1!important;transform:none!important}[wire\\:loading]{display:none!important}*{animation:none!important;transition:none!important}'.$extra.'</style><script src="../../../assets/gsap.min.js"></script></head><body><div id="capture-root" data-composition-id="capture" data-width="'.$width.'" data-height="'.$height.'" data-duration="2">'.$html.'</div><script>window.__timelines={capture:gsap.timeline({paused:true})};</script></body></html>';
     $page = str_replace('main{display:block!important}', '.finder>main{display:block!important}', $page);
+    $page = str_replace('#results-anchor{display:flex!important}', '#results-anchor{display:block!important}', $page);
+    $page = str_replace('#finder-form{display:flex!important}', '#finder-form{display:grid!important}', $page);
+    $page = str_replace('</style>', '[wire\\:dirty]{display:none!important}</style>', $page);
     $page = str_replace('<script src="../../../assets/gsap.min.js"></script>', '<script src="gsap.min.js"></script>', $page);
     $folder = $output.'/'.$name;
     if (! is_dir($folder)) {
@@ -72,7 +75,7 @@ $finder->call('search');
 exportScreen($finder, 'results', '#results-anchor', 1440, 1150);
 $id = $finder->get('result.contractors.0.profile.id');
 $finder->call('openContractorDetail', $id);
-exportScreen($finder, 'profile', '.detail-panel', 1440, 1100);
+exportScreen($finder, 'profile', '.detail-panel', 1440, 1540);
 $finder->call('closeContractorDetail')->set('date', '2026-09-24')->call('search');
 exportScreen($finder, 'date', '#results-anchor', 1440, 1150);
 $finder->set('category', 'Флорист')->set('budget', '1')->call('search');
