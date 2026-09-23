@@ -99,161 +99,215 @@ new #[Layout('layouts.finder')] class extends Component {
 }; ?>
 
 <div x-data x-on:locale-changed.window="document.documentElement.lang = $event.detail.locale; document.title = $event.detail.title; document.querySelector('meta[name=description]').content = $event.detail.description">
-    <header class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-7 sm:px-10">
-        <a href="{{ route('home') }}" class="text-3xl font-semibold tracking-tight" aria-label="{{ __('Повод — главная') }}">повод<span class="text-violet-600 dark:text-violet-400">.</span></a>
-        <div class="flex flex-wrap items-center justify-end gap-4">
-            <a href="#how-it-works" class="text-sm underline decoration-zinc-300 underline-offset-4 hover:decoration-zinc-800 dark:decoration-zinc-600">{{ __('Как это работает') }}</a>
-            <nav class="flex gap-1" aria-label="{{ __('Язык интерфейса') }}">
-                <flux:button size="sm" wire:click="switchLocale('kk')" :variant="$locale === 'kk' ? 'primary' : 'ghost'" :aria-pressed="$locale === 'kk' ? 'true' : 'false'" lang="kk">Қазақша</flux:button>
-                <flux:button size="sm" wire:click="switchLocale('ru')" :variant="$locale === 'ru' ? 'primary' : 'ghost'" :aria-pressed="$locale === 'ru' ? 'true' : 'false'" lang="ru">Русский</flux:button>
-            </nav>
-        </div>
+    <a href="#finder-form" class="finder-skip">{{ __('Перейти к подбору') }}</a>
+    <header class="finder-nav finder-container">
+        <a href="{{ route('home') }}" class="finder-brand" aria-label="{{ __('Повод — главная') }}">
+            <span class="finder-brand-mark" aria-hidden="true">п.</span>
+            <span>повод<span class="finder-brand-dot">.</span></span>
+        </a>
+        <a href="#how-it-works" class="finder-nav-link">{{ __('Как это работает') }} <span aria-hidden="true">↗</span></a>
+        <nav class="finder-language" aria-label="{{ __('Язык интерфейса') }}">
+            <flux:button size="sm" wire:click="switchLocale('kk')" :variant="$locale === 'kk' ? 'primary' : 'ghost'" :aria-pressed="$locale === 'kk' ? 'true' : 'false'" lang="kk">Қазақша</flux:button>
+            <flux:button size="sm" wire:click="switchLocale('ru')" :variant="$locale === 'ru' ? 'primary' : 'ghost'" :aria-pressed="$locale === 'ru' ? 'true' : 'false'" lang="ru">Русский</flux:button>
+        </nav>
     </header>
-    <main class="mx-auto max-w-7xl px-5 pb-12 sm:px-10">
-        <section class="grid gap-8 rounded-[2rem] bg-[#eae6f3] p-6 dark:bg-[#262132] lg:grid-cols-[0.9fr_1.1fr] lg:gap-12 lg:p-12" aria-labelledby="finder-title">
-            <div class="flex flex-col justify-between gap-12 py-3">
-                <div class="flex flex-col gap-7">
-                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-violet-900 dark:text-violet-300">{{ __('Хорошее событие начинается с людей') }}</p>
-                    <h1 id="finder-title" class="font-serif text-5xl leading-[1.06] tracking-tight sm:text-6xl lg:text-7xl">{{ __('Ваш повод.') }}<br>{{ __('Ваши люди.') }}</h1>
-                    <p class="max-w-sm text-lg leading-relaxed text-zinc-700 dark:text-zinc-300">{{ __('Найдём подрядчиков, которые подходят вашему событию. По дате, бюджету и делу.') }}</p>
-                    <div class="flex flex-wrap gap-2 text-xs">
-                        <span class="rounded-full border border-violet-900/20 px-3 py-2 dark:border-violet-200/20">{{ __('66 профилей') }}</span>
-                        <span class="rounded-full border border-violet-900/20 px-3 py-2 dark:border-violet-200/20">{{ __('До 3 рекомендаций') }}</span>
-                        <span class="rounded-full border border-violet-900/20 px-3 py-2 dark:border-violet-200/20">{{ __('С причинами выбора') }}</span>
-                    </div>
-                </div>
-                <p class="max-w-sm border-t border-violet-900/15 pt-6 text-sm leading-relaxed text-zinc-600 dark:border-violet-200/20 dark:text-zinc-400">{{ __('Для свадьбы, большого корпоратива или праздника в кругу самых близких.') }}</p>
+
+    <main class="finder-container">
+        <section class="finder-hero" aria-labelledby="finder-title">
+            <div class="finder-hero-heading">
+                <p class="finder-eyebrow"><span class="finder-small-line" aria-hidden="true"></span>{{ __('Люди, которые создают события') }}</p>
+                <h1 id="finder-title">{{ __('Ваш повод.') }}<br><em>{{ __('Ваши люди.') }}</em></h1>
             </div>
-            <form wire:submit="search" class="flex flex-col gap-6 rounded-3xl bg-white p-6 shadow-sm sm:p-8 dark:bg-zinc-900" aria-label="{{ __('Параметры мероприятия') }}">
+            <div class="finder-hero-aside">
+                <p class="finder-hero-intro">{{ __('Найдём подрядчиков, которые подходят вашему событию. По дате, бюджету и делу.') }}</p>
+                <a href="#finder-form" class="finder-text-link">{{ __('Начать подбор') }} <span aria-hidden="true">↓</span></a>
+                <div class="finder-hero-facts">
+                    <div><strong>66</strong><span>{{ __('профилей в каталоге') }}</span></div>
+                    <div><strong>03</strong><span>{{ __('варианта для вас') }}</span></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="finder-season">
+            <p>{{ __('Для свадьбы, большого корпоратива или праздника в кругу самых близких.') }}</p>
+            <span>2026 <span aria-hidden="true">/</span> {{ __('Осень — зима') }}</span>
+        </div>
+
+        <section id="finder-form" class="finder-brief" aria-labelledby="brief-title">
+            <aside class="finder-brief-intro">
                 <div>
-                    <h2 class="text-2xl font-medium tracking-tight">{{ __('Что планируете?') }}</h2>
-                    <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">{{ __('Расскажите о событии — мы сузим круг поиска.') }}</p>
+                    <p class="finder-eyebrow">01 / {{ __('Ваши условия') }}</p>
+                    <h2 id="brief-title">{{ __('Что планируете?') }}</h2>
+                    <p class="finder-brief-description">{{ __('Расскажите о событии — мы сузим круг поиска.') }}</p>
                 </div>
-                <div class="grid gap-5 sm:grid-cols-2">
-                    <flux:select wire:model="city" label="{{ __('Город') }}" required>
-                        <option value="">{{ __('Выберите город') }}</option>
-                        @foreach ($this->options['cities'] as $option)
-                            <option wire:key="city-{{ $loop->index }}" value="{{ $option }}">{{ __($option) }}</option>
-                        @endforeach
-                    </flux:select>
-                    <flux:input wire:model="date" type="date" label="{{ __('Дата мероприятия') }}" min="2026-09-23" max="2026-12-31" required />
-                    <flux:select wire:model="event_format" label="{{ __('Тип мероприятия') }}" required>
-                        <option value="">{{ __('Выберите формат') }}</option>
-                        @foreach ($this->options['event_formats'] as $option)
-                            <option wire:key="format-{{ $loop->index }}" value="{{ $option }}">{{ mb_ucfirst(__($option)) }}</option>
-                        @endforeach
-                    </flux:select>
-                    <flux:select wire:model="category" label="{{ __('Категория подрядчика') }}" required>
-                        <option value="">{{ __('Выберите категорию') }}</option>
-                        @foreach ($this->options['categories'] as $option)
-                            <option wire:key="category-{{ $loop->index }}" value="{{ $option }}">{{ __($option) }}</option>
-                        @endforeach
-                    </flux:select>
-                    <div class="sm:col-span-2">
-                        <flux:input wire:model="budget" type="number" label="{{ __('Бюджет, ₸') }}" min="1" max="1000000000" step="1" placeholder="500000" required />
+                <div class="finder-invitation" aria-hidden="true">
+                    <span>повод.</span>
+                    <div class="finder-invitation-rule"></div>
+                    <span class="finder-invitation-number">01 — 03</span>
+                    <span>{{ __('С причинами выбора') }}</span>
+                </div>
+                <p class="finder-brief-note">{{ __('Календарь каталога: 23 сентября — 31 декабря 2026 года.') }}</p>
+            </aside>
+
+            <form wire:submit="search" class="finder-form" aria-label="{{ __('Параметры мероприятия') }}">
+                <fieldset>
+                    <legend><span>A</span>{{ __('О событии') }}</legend>
+                    <div class="finder-field-grid">
+                        <flux:select wire:model="city" label="{{ __('Город') }}" required>
+                            <option value="">{{ __('Выберите город') }}</option>
+                            @foreach ($this->options['cities'] as $option)
+                                <option wire:key="city-{{ $loop->index }}" value="{{ $option }}">{{ __($option) }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:input wire:model="date" type="date" label="{{ __('Дата мероприятия') }}" min="2026-09-23" max="2026-12-31" required />
+                        <flux:select wire:model="event_format" label="{{ __('Тип мероприятия') }}" required>
+                            <option value="">{{ __('Выберите формат') }}</option>
+                            @foreach ($this->options['event_formats'] as $option)
+                                <option wire:key="format-{{ $loop->index }}" value="{{ $option }}">{{ mb_ucfirst(__($option)) }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:select wire:model="category" label="{{ __('Категория подрядчика') }}" required>
+                            <option value="">{{ __('Выберите категорию') }}</option>
+                            @foreach ($this->options['categories'] as $option)
+                                <option wire:key="category-{{ $loop->index }}" value="{{ $option }}">{{ __($option) }}</option>
+                            @endforeach
+                        </flux:select>
                     </div>
-                    <flux:input wire:model="hours" type="number" label="{{ __('Длительность, часы') }}" min="1" max="24" step="1" placeholder="{{ __('Необязательно') }}" />
-                    <flux:select wire:model="language" label="{{ __('Язык работы') }}">
-                        <option value="">{{ __('Любой') }}</option>
-                        @foreach ($this->options['languages'] as $option)
-                            <option wire:key="language-{{ $loop->index }}" value="{{ $option }}">{{ mb_ucfirst(__($option)) }}</option>
-                        @endforeach
-                    </flux:select>
-                </div>
-                <p class="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">{{ __('Календарь каталога: 23 сентября — 31 декабря 2026 года.') }}</p>
-                <div class="flex flex-col gap-3">
-                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="search" class="w-full">
-                        <span wire:loading.remove wire:target="search">{{ __('Подобрать подрядчиков') }} <span aria-hidden="true">↗</span></span>
+                </fieldset>
+
+                <fieldset>
+                    <legend><span>B</span>{{ __('Бюджет и детали') }}</legend>
+                    <div class="finder-field-grid">
+                        <div class="finder-budget-field">
+                            <flux:input wire:model="budget" type="number" label="{{ __('Бюджет, ₸') }}" min="1" max="1000000000" step="1" placeholder="500000" required />
+                        </div>
+                        <flux:input wire:model="hours" type="number" label="{{ __('Длительность, часы') }}" min="1" max="24" step="1" placeholder="{{ __('Необязательно') }}" />
+                        <flux:select wire:model="language" label="{{ __('Язык работы') }}">
+                            <option value="">{{ __('Любой') }}</option>
+                            @foreach ($this->options['languages'] as $option)
+                                <option wire:key="language-{{ $loop->index }}" value="{{ $option }}">{{ mb_ucfirst(__($option)) }}</option>
+                            @endforeach
+                        </flux:select>
+                    </div>
+                </fieldset>
+
+                <div class="finder-submit-row">
+                    <p>{{ __('Покажем до трёх вариантов и причины выбора') }}</p>
+                    <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="search" class="finder-submit">
+                        <span wire:loading.remove wire:target="search">{{ __('Подобрать подрядчиков') }} <span class="finder-button-arrow" aria-hidden="true">↗</span></span>
                         <span wire:loading wire:target="search">{{ __('Подбираем варианты…') }}</span>
                     </flux:button>
-                    <p class="text-center text-xs text-zinc-500 dark:text-zinc-400">{{ __('Покажем до трёх вариантов и причины выбора') }}</p>
                 </div>
             </form>
         </section>
 
-        <section class="py-12" aria-live="polite" aria-atomic="true" aria-label="{{ __('Результаты подбора') }}">
-            <p wire:loading wire:target="search" class="py-5 text-lg">{{ __('Проверяем доступность и подбираем варианты…') }}</p>
+        <section class="finder-results" aria-live="polite" aria-label="{{ __('Результаты подбора') }}">
+            <div wire:loading wire:target="search" class="finder-loading" role="status">
+                <span class="finder-loading-dot" aria-hidden="true"></span>{{ __('Проверяем доступность и подбираем варианты…') }}
+            </div>
             @if ($result)
-                <div wire:loading.remove wire:target="search" class="flex flex-col gap-7">
-                    <div class="flex flex-wrap items-end justify-between gap-4">
-                        <div class="flex flex-col gap-2">
-                            <p class="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">{{ __('Ваша подборка') }}</p>
-                            <h2 class="font-serif text-4xl sm:text-5xl">{{ match ($result['status']) { 'matched' => __('Есть совпадение.'), 'no_category' => __('Пока нет в каталоге.'), default => __('Нужны другие условия.') } }}</h2>
+                <div wire:loading.remove wire:target="search">
+                    <div class="finder-section-heading">
+                        <div>
+                            <p class="finder-eyebrow">02 / {{ __('Ваша подборка') }}</p>
+                            <h2>{{ match ($result['status']) { 'matched' => __('Есть совпадение.'), 'no_category' => __('Пока нет в каталоге.'), default => __('Нужны другие условия.') } }}</h2>
                         </div>
-                        <p class="text-sm text-zinc-600 dark:text-zinc-400">{{ __($submitted['city']) }} · {{ __($submitted['category']) }} · {{ \Carbon\CarbonImmutable::parse($submitted['date'])->format('d.m.Y') }}</p>
+                        <p class="finder-result-context">{{ __($submitted['city']) }}<br>{{ __($submitted['category']) }} · {{ \Carbon\CarbonImmutable::parse($submitted['date'])->format('d.m.Y') }}</p>
                     </div>
-                    <p wire:dirty class="rounded-xl bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">{{ __('Параметры изменены. Нажмите «Подобрать подрядчиков», чтобы обновить результаты.') }}</p>
+                    <p wire:dirty class="finder-notice">{{ __('Параметры изменены. Нажмите «Подобрать подрядчиков», чтобы обновить результаты.') }}</p>
+
                     @if ($result['status'] === 'no_category')
-                        <div class="rounded-2xl border border-zinc-200 bg-white p-7 dark:border-zinc-700 dark:bg-zinc-900">
-                            <p>{{ __('В городе «:city» нет подрядчиков категории «:category» в имеющемся каталоге.', ['city' => __($submitted['city']), 'category' => __($submitted['category'])]) }}</p>
-                            <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">{{ __('Попробуйте выбрать другой город или категорию.') }}</p>
+                        <div class="finder-empty">
+                            <span class="finder-empty-symbol" aria-hidden="true">∅</span>
+                            <div>
+                                <p>{{ __('В городе «:city» нет подрядчиков категории «:category» в имеющемся каталоге.', ['city' => __($submitted['city']), 'category' => __($submitted['category'])]) }}</p>
+                                <p class="finder-muted">{{ __('Попробуйте выбрать другой город или категорию.') }}</p>
+                                <a href="#finder-form" class="finder-text-link">{{ __('Изменить условия') }} <span aria-hidden="true">↑</span></a>
+                            </div>
                         </div>
                     @else
-                        <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                            {{ __('В городе и категории: :total. Подходят всем условиям: :eligible. Показываем: :shown.', ['total' => $result['total'], 'eligible' => $result['eligible'], 'shown' => count($result['contractors'])]) }}
+                        <div class="finder-results-summary">
+                            <p>{{ __('В городе и категории: :total. Подходят всем условиям: :eligible. Показываем: :shown.', ['total' => $result['total'], 'eligible' => $result['eligible'], 'shown' => count($result['contractors'])]) }}</p>
                             @if ($result['eligible'] > 0 && $result['eligible'] < 3)
-                                {{ __('В каталоге нашлось меньше трёх подходящих вариантов.') }}
+                                <p>{{ __('В каталоге нашлось меньше трёх подходящих вариантов.') }}</p>
                             @elseif ($result['eligible'] === 0)
-                                {{ __('Кандидаты есть, но ни один не прошёл все условия. Попробуйте изменить дату, бюджет или дополнительные параметры.') }}
+                                <p>{{ __('Кандидаты есть, но ни один не прошёл все условия. Попробуйте изменить дату, бюджет или дополнительные параметры.') }}</p>
+                                <a href="#finder-form" class="finder-text-link">{{ __('Изменить условия') }} <span aria-hidden="true">↑</span></a>
                             @endif
-                        </p>
-                        @if (array_sum($result['reasons']) > 0)
-                            <div class="flex flex-col gap-3 rounded-2xl border border-zinc-200 p-5 dark:border-zinc-700">
-                                <h3 class="text-sm font-medium">{{ __('Почему подошли не все') }}</h3>
-                                <ul class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                                    @foreach (['busy' => __('Заняты на дату'), 'budget' => __('Цена выше бюджета'), 'format' => __('Не указан нужный формат'), 'language' => __('Не указан нужный язык'), 'hours' => __('Превышен лимит часов')] as $reason => $label)
-                                        @if ($result['reasons'][$reason] > 0)
-                                            <li wire:key="reason-{{ $reason }}">{{ $label }}: <strong class="font-medium text-zinc-900 dark:text-zinc-200">{{ $result['reasons'][$reason] }}</strong></li>
-                                        @endif
-                                    @endforeach
-                                </ul>
-                                <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Причины могут пересекаться: один профиль может не подходить по нескольким условиям.') }}</p>
-                            </div>
-                        @endif
-                        <div class="grid gap-5 lg:grid-cols-3">
+                        </div>
+
+                        <div class="finder-recommendations">
                             @foreach ($result['contractors'] as $card)
-                                <article wire:key="contractor-{{ $card['profile']['id'] }}" class="flex flex-col gap-5 rounded-3xl border border-zinc-200 bg-white p-7 dark:border-zinc-700 dark:bg-zinc-900">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span class="font-serif text-4xl text-violet-700 dark:text-violet-300">0{{ $loop->iteration }}</span>
+                                <article wire:key="contractor-{{ $card['profile']['id'] }}" class="finder-contractor">
+                                    <div class="finder-contractor-identity">
+                                        <span class="finder-contractor-number">0{{ $loop->iteration }}</span>
+                                        <div>
+                                            <p class="finder-contractor-category">{{ implode(' · ', array_map(fn ($category) => __($category), $card['profile']['categories'])) }}</p>
+                                            <h3>{{ $card['profile']['anon_name'] }}</h3>
+                                            <p class="finder-contractor-city">{{ __($card['profile']['city']) }} <span aria-hidden="true">/</span> {{ $card['profile']['id'] }}</p>
+                                        </div>
                                         @if ($card['profile']['synthetic'])
-                                            <flux:badge size="sm" color="amber">{{ __('Синтетический профиль') }}</flux:badge>
+                                            <span class="finder-synthetic">{{ __('Синтетический профиль') }}</span>
                                         @endif
                                     </div>
-                                    <div class="flex flex-col gap-2">
-                                        <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ implode(' · ', array_map(fn ($category) => __($category), $card['profile']['categories'])) }} · {{ __($card['profile']['city']) }}</p>
-                                        <h3 class="text-2xl font-medium tracking-tight">{{ $card['profile']['anon_name'] }}</h3>
-                                        <p class="text-xl">{{ __('от :price ₸', ['price' => number_format($card['profile']['price_from_kzt'], 0, '.', ' ')]) }}</p>
+                                    <div class="finder-contractor-reason">
+                                        <h4><span aria-hidden="true">↳</span> {{ __('Почему подходит') }}</h4>
+                                        <p>{{ $card['explanation'] }}</p>
                                     </div>
-                                    <div class="flex flex-col gap-2 border-t border-zinc-100 pt-5 dark:border-zinc-800">
-                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-violet-800 dark:text-violet-300">{{ __('Почему подходит') }}</h4>
-                                        <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">{{ $card['explanation'] }}</p>
+                                    <div class="finder-contractor-price">
+                                        <p class="finder-price">{{ __('от :price ₸', ['price' => number_format($card['profile']['price_from_kzt'], 0, '.', ' ')]) }}</p>
+                                        <p>{{ __('По календарю каталога дата свободна. Итоговую цену и доступность нужно подтвердить у подрядчика.') }}</p>
+                                        @if ($card['profile']['city_imputed'] || $card['profile']['price_imputed'])
+                                            <p class="finder-imputed">{{ $card['profile']['city_imputed'] ? __('Город восстановлен в датасете. ') : '' }}{{ $card['profile']['price_imputed'] ? __('Цена оценочная из датасета.') : '' }}</p>
+                                        @endif
                                     </div>
-                                    <p class="mt-auto text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">{{ __('По календарю каталога дата свободна. Итоговую цену и доступность нужно подтвердить у подрядчика.') }}</p>
-                                    @if ($card['profile']['city_imputed'] || $card['profile']['price_imputed'])
-                                        <p class="text-xs text-amber-800 dark:text-amber-300">{{ $card['profile']['city_imputed'] ? __('Город восстановлен в датасете. ') : '' }}{{ $card['profile']['price_imputed'] ? __('Цена оценочная из датасета.') : '' }}</p>
-                                    @endif
                                 </article>
                             @endforeach
                         </div>
+
+                        @if (array_sum($result['reasons']) > 0)
+                            <details class="finder-exclusions" @if ($result['eligible'] === 0) open @endif>
+                                <summary>{{ __('Почему подошли не все') }} <span aria-hidden="true">+</span></summary>
+                                <div class="finder-exclusion-body">
+                                    <ul>
+                                        @foreach (['busy' => __('Заняты на дату'), 'budget' => __('Цена выше бюджета'), 'format' => __('Не указан нужный формат'), 'language' => __('Не указан нужный язык'), 'hours' => __('Превышен лимит часов')] as $reason => $label)
+                                            @if ($result['reasons'][$reason] > 0)
+                                                <li wire:key="reason-{{ $reason }}"><span>{{ $label }}</span><strong>{{ $result['reasons'][$reason] }}</strong></li>
+                                            @endif
+                                        @endforeach
+                                    </ul>
+                                    <p>{{ __('Причины могут пересекаться: один профиль может не подходить по нескольким условиям.') }}</p>
+                                </div>
+                            </details>
+                        @endif
                         @if ($result['eligible'] > 0)
-                            <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $result['ranking'] === 'ai' ? __('Порядок и цитаты подобраны ИИ. Дата, цена и условия проверены по каталогу.') : __('Подбор по правилам: сначала меньшая цена, при равной цене — ID профиля. Объяснения основаны на каталоге.') }}</p>
+                            <p class="finder-ranking-note">{{ $result['ranking'] === 'ai' ? __('Порядок и цитаты подобраны ИИ. Дата, цена и условия проверены по каталогу.') : __('Подбор по правилам: сначала меньшая цена, при равной цене — ID профиля. Объяснения основаны на каталоге.') }}</p>
                         @endif
                     @endif
                 </div>
             @endif
         </section>
-        <section id="how-it-works" class="grid gap-8 border-t border-zinc-300/70 pt-8 dark:border-zinc-700 md:grid-cols-3" aria-label="{{ __('Как это работает') }}">
-            @foreach ([['01', __('Ваши условия'), __('Укажите город, дату и бюджет. Язык и длительность — по желанию.')], ['02', __('Честный отбор'), __('Проверяем занятость и условия по каталогу. Если вариантов нет, объясним почему.')], ['03', __('Понятный выбор'), __('До трёх профилей с фактами и описанием, чтобы проще было сравнить.')]] as [$number, $heading, $text])
-                <div wire:key="step-{{ $number }}" class="flex flex-col gap-3">
-                    <p class="text-xs text-violet-800 dark:text-violet-300">{{ $number }} /</p>
-                    <h2 class="text-lg font-medium">{{ $heading }}</h2>
-                    <p class="max-w-sm text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{{ $text }}</p>
-                </div>
-            @endforeach
+
+        <section id="how-it-works" class="finder-process" aria-labelledby="process-title">
+            <div class="finder-process-intro">
+                <p class="finder-eyebrow">{{ __('Как это работает') }}</p>
+                <h2 id="process-title">{{ __('Меньше поиска.') }}<br><em>{{ __('Больше повода.') }}</em></h2>
+            </div>
+            <div class="finder-process-steps">
+                @foreach ([['01', __('Ваши условия'), __('Укажите город, дату и бюджет. Язык и длительность — по желанию.')], ['02', __('Честный отбор'), __('Проверяем занятость и условия по каталогу. Если вариантов нет, объясним почему.')], ['03', __('Понятный выбор'), __('До трёх профилей с фактами и описанием, чтобы проще было сравнить.')]] as [$number, $heading, $text])
+                    <div wire:key="step-{{ $number }}" class="finder-process-step">
+                        <span>{{ $number }}</span>
+                        <div><h3>{{ $heading }}</h3><p>{{ $text }}</p></div>
+                    </div>
+                @endforeach
+            </div>
         </section>
-        <footer class="mt-12 flex flex-wrap justify-between gap-3 border-t border-zinc-200 pt-6 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-            <span>{{ __('повод. / Каталог для вашего события') }}</span>
-            <span>{{ __('Демо · Осень — зима 2026 · Без бронирования') }}</span>
-        </footer>
     </main>
+    <footer class="finder-footer">
+        <div class="finder-container">
+            <a href="{{ route('home') }}" class="finder-footer-brand" aria-label="{{ __('Повод — главная') }}">повод.</a>
+            <div><p>{{ __('повод. / Каталог для вашего события') }}</p><p>{{ __('Демо · Осень — зима 2026 · Без бронирования') }}</p></div>
+            <a href="#finder-form" class="finder-footer-link">{{ __('Начать подбор') }} <span aria-hidden="true">↗</span></a>
+        </div>
+    </footer>
 </div>
